@@ -1,0 +1,1390 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="App">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="yaqiang zhang">
+
+    <title>v1.0.0</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="dashboard.css" rel="stylesheet">
+    <!--<link rel="stylesheet" href="http://at.alicdn.com/t/font_pe1r84ob40rx80k9.css">-->
+    <!---->
+    <!--<link rel="stylesheet" href="app.css">-->
+
+
+    <style type="text/css">
+        .icon {
+            width: 1em; height: 1em;
+            vertical-align: -0.15em;
+            fill: currentColor;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body ng-controller="MyController">
+    <!--导航栏-->
+    <div class="navbar navbar-inverse navbar-fixed-top head"  role="navigation">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <a class="navbar-brand" href="#" style="color: #FFFFFF;">Supervideo</a>
+            </div>
+            <div id="navbar" class="collapse navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <!--导航栏样式-->
+                    <li><a href="#" style="font-size: 120%; padding-left: 30px; padding-right: 30px; ">项目管理</a></li>
+                    <li><a href="#" style="font-size: 120%; padding-left: 30px; padding-right: 30px; ">文档</a></li>
+                    <li><a href="#" style="font-size: 120%; padding-left: 30px; padding-right: 30px; ">下载</a></li>
+                    <li><a href="#" style="font-size: 120%; padding-left: 30px; padding-right: 30px; ">应用商店</a></li>
+                    <ul class="nav navbar-nav" ng-if="User!=null">
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false"
+                               style="font-size: 120%; padding-left: 30px;padding-right: 30px;">
+                                {{User}}
+                                <span class="caret"></span></a>
+                            <ul class="dropdown-menu" role="menu">
+                                <li><a href="#">账号管理</a></li>
+                                <li class="divider"></li>
+                                <li><a href="#" ng-click="logout()">退出登录</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                    <ul class="nav navbar-nav" ng-if="User==null">
+                        <li><a href="#register" data-toggle="modal" style="font-size: 120%; padding-left: 30px; padding-right: 30px; ">注册</a></li>
+                        <li><a href="#login" data-toggle="modal" style="font-size: 120%; padding-left: 30px; padding-right: 30px; ">登录</a></li>
+                    </ul>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="container-fluid">
+            <!--侧栏-->
+            <li class="sidebar">
+                <ul class="nav nav-pills nav-stacked sidebar-menu">
+                    <li class="sidebar-header">
+                        <h5 style="font-weight: normal;">{{current_project.project_name}}
+                            <a href="#" class="pull-right" data-toggle="dropdown">切换<span class="caret"></span></a>
+                            <ul class="dropdown-menu pull-right" style="background-size: 80%" role="menu">
+                                <!--<li><a href="#project">Test</a></li>-->
+                                <!--<li><a href="#my-project">我的项目</a></li>-->
+                                <li><a href="" class="disabled">{{current_project.project_name}}</a></li>
+                                <li class="divider"></li>
+                                <li><a href="#{{project.project_name}}" ng-click="change_project(project)" ng-repeat="project in projects">{{project.project_name}}</a></li>
+                                <li class="divider"></li>
+                                <li><a href="#createProject" data-toggle="modal" ng-click="dialog={open: true}">新建项目</a></li>
+                                <!--<dialog ng-if="dialog.open" modal close="dialog.open=false" ng-controller="createProject">-->
+                                    <!--<div>-->
+                                    <!--&lt;!&ndash;<div ng-if="create_success==false">&ndash;&gt;-->
+                                        <!--<div dialog-title>新建项目</div>-->
+                                        <!--<div dialog-content>请输入项目名称</div>-->
+                                        <!--<input type="text" ng-model="project_name">-->
+                                        <!--<div dialog-buttons><button autofocus>确定</button><button ng-click="$close();create_project()">取消</button></div>-->
+                                    <!--</div>-->
+                                    <!--<div ng-if="create_success">-->
+                                        <!--<div dialog-title>新建成功</div>-->
+                                        <!--<div dialog-content>项目名称{{project_name}}</div>-->
+                                        <!--<div dialog-buttons><button autofocus ng-click="create_success=false">确定</button></div>-->
+                                    <!--</div>-->
+                                <!--</dialog>-->
+                            </ul>
+                        </h5>
+                    </li>
+                    <li class="active"><a class="nav-pills" data-toggle="tab" href="#project_preview"><img src="images/home_icon.png" alt="">项目概览</a></li>
+                    <li><h>添加功能</h></li>
+                    <li><a class="nav-pills"  data-toggle="tab" href="#topic_vote"><img src="images/topic_icon.png"alt="">话题投票</a></li>
+                    <!--<li><a class="nav-pills"  data-toggle="tab" href="#topic_vote" ng-click="project_info()"><img src="images/topic_icon.png"alt="">话题投票</a></li>-->
+                    <li><a class="nav-pills" data-toggle="tab" href="#card_vote" ><img src="images/card_icon.png"alt="">卡片投票</a></li>
+                    <li><a class="nav-pills" data-toggle="tab" href="#cloud_picture" ><img src="images/pictrue_icon.png" alt="">云图云窗</a></li>
+                    <li><a class="nav-pills" data-toggle="tab" href="#ad_picture" ><img src="images/ad_icon.png" width="16" height="16" alt="">广告云窗</a></li>
+                    <li><h>数据中心</h></li>
+                    <li><a class="nav-pills" data-toggle="tab" href="#play_count" ><img src="images/statistic_icon.png" width="16" height="16" alt=""><span>视频统计</span></a></li>
+                    <li><a class="nav-pills" data-toggle="tab" href="#point_count" ><img src="images/statistic_icon.png" width="16" height="16" alt="">热点统计</a></li>
+                    <li><a class="nav-pills" data-toggle="tab" href="#link_count" ><img src="images/statistic_icon.png" width="16" height="16" alt="">外链统计</a></li>
+                    <li><a class="nav-pills" data-toggle="tab" href="#info_count" ><img src="images/statistic_icon.png" width="16" height="16" alt="">栏目统计</a></li>
+                    <li><h>管理中心</h></li>
+                    <li><a class="nav-pills" data-toggle="tab" href="#user_admin" ><img src="images/admin_icon.png" width="16" height="16" alt="">用户权限</a></li>
+                    <li><a class="nav-pills" data-toggle="tab" href="#project_setting" ><img src="images/set_icon.png" width="16" height="16" alt=""><span>项目设置</span></a></li>
+                    <!--<li><a class="nav-pills" data-toggle="tab" href="#element_admin" ng-click="element_info()"><img src="images/terminal_icon.png" alt="" width="16" height="16"><span>元素管理</span></a></li>-->
+                    <li><a class="nav-pills" data-toggle="tab" href="#element_admin"><img src="images/terminal_icon.png" alt="" width="16" height="16"><span>元素管理</span></a></li>
+                    <li><h>帮助中心</h></li>
+                    <li><a class="nav-pills" data-toggle="tab" href="#help" ><img src="images/help_icon.png" alt="" width="16" height="16">常见问题</a></li>
+                    <li><a class="nav-pills" data-toggle="tab" href="#help" ><img src="images/help_icon.png" alt="" width="16" height="16">常见问题</a></li>
+                    <li><a class="nav-pills" data-toggle="tab" href="#help" ><img src="images/help_icon.png" alt="" width="16" height="16">常见问题</a></li>
+                    <li><a class="nav-pills" data-toggle="tab" href="#help" ><img src="images/help_icon.png" alt="" width="16" height="16">常见问题</a></li>
+                    <li><a class="nav-pills" data-toggle="tab" href="#help" ><img src="images/help_icon.png" alt="" width="16" height="16">常见问题</a></li>
+                </ul>
+            </div>
+            <!--主体-->
+            <div class="main tab-content container-fluid">
+                <!--项目概览-->
+                <div class="tab-pane active container-fluid" id="project_preview">
+                    <div class="page-header">
+                        <h1>项目概览</h1>
+                    </div>
+                    <!--数据总览-->
+                    <div class="row container-fluid clearfix">
+                        <div class="col-xs-6 col-sm-3 data-box">
+                            <div class="data-box-title">100</div>
+                            <div class="data-box-data">本月视频播放量</div>
+                        </div>
+                        <div class="col-xs-6 col-sm-3 data-box-hot-point">
+                            <div class="data-box-title">100</div>
+                            <div class="data-box-data">本月热点曝光量</div>
+                        </div>
+                        <div class="col-xs-6 col-sm-3 data-box-hot-point">
+                            <div class="data-box-title">100</div>
+                            <div class="data-box-data">本月热点点击量</div>
+                        </div>
+                        <div class="col-xs-6 col-sm-3 data-box-link">
+                            <div class="data-box-title">100</div>
+                            <div class="data-box-data">外链曝光量</div>
+                        </div>
+                        <div class="col-xs-6 col-sm-3 data-box-link">
+                            <div class="data-box-title">100</div>
+                            <div class="data-box-data">外链点击量</div>
+                        </div>
+                        <div class="col-xs-6 col-sm-3 data-box">
+                            <div class="data-box-title">100</div>
+                            <div class="data-box-data">本月视频播放UV</div>
+                        </div>
+                        <div class="col-xs-6 col-sm-3 data-box-sum">
+                            <div class="data-box-title">100</div>
+                            <div class="data-box-data">视频播放总量</div>
+                        </div>
+                        <div class="col-xs-6 col-sm-3 data-box-sum">
+                            <div class="data-box-title">100</div>
+                            <div class="data-box-data">热点点击总量</div>
+                        </div>
+
+                    </div>
+                    <!--用户上线时间-->
+                    <div class="row container-fluid">
+                        <div class="panel panel-primary">
+                            <div class="panel-heading">用户上线时间</div>
+                            <div class="panel-body">
+                                <div id="online-time" style="height: 300px;"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <!--数据分布-->
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="panel panel-primary">
+                                <div class="panel-heading">浏览器分布</div>
+                                    <div class="panel-body">
+                                        <div id="browser" style="height: 300px;"></div>
+                                    </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="panel panel-primary">
+                                <div class="panel-heading">用户设备</div>
+                                <div class="panel-body">
+                                    <div id="device" style="height: 300px;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!--操作系统-->
+                    <div class="row container-fluid">
+                        <div class="panel panel-primary">
+                            <div class="panel-heading">用户操作系统</div>
+                            <div class="panel-body">
+                                <div id="user-os" style="height: 400px;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!--话题投票-->
+                <div class="tab-pane container-fluid" id="topic_vote" ng-controller="topicVote">
+                    <div class="page-header">
+                        <h1>话题投票</h1>
+                    </div>
+                    <div class="media">
+                        <div class="row">
+                            <div class="col-sm-8 col-xs-offset-1">
+                                <div class="row" style="position: relative">
+                                    <video id="topic_vote_video" video-control href="#" data-toggle="modal" src={{video_url}} controls="controls" ng-click="add_hotpoint($event);bubble.open = true" width="800" height="600" style="border-radius: 5px"></video>
+                                    <div class="preview-box" ng-repeat="element in voteInfo" style="position: absolute;left: {{element.left}}px;top: {{element.top}}px;z-index: 100" ng-if="time>element.current_time&&time<element.current_time+3" ng-controller="Vote">
+                                        <div class="style-preview style-{{element.color}}">
+                                            <div style="background-image: url({{element.pic}})" class="banner"></div>
+                                            <div class="question" ng-bind="element.title"></div>
+                                            <div class="options">
+                                                <!-- ngRepeat: option in editDg.qoptions -->
+                                                <div  ng-if="!element.voted" ng-repeat="option in element.options track by $index" class="option ng-scope" style="">
+                                                    <label>
+                                                        <input type="radio" name="option" ng-model="element.answer" value={{$index}}>
+                                                        <span class="ng-binding">{{option}}</span>
+                                                    </label>
+                                                </div>
+                                                <form class="form-horizontal" ng-if="element.voted" ng-repeat="option in element.options track by $index">
+                                                    <div class="form-group">
+                                                        <label class="col-sm-3">{{option}}</label>
+                                                        <label class="col-sm-9">共计{{element.sta_info[$index]}}票</label>
+                                                        <!--<div class="col-sm-10 progress">-->
+                                                        <!--<div class="progress-bar progress-bar-success" role="progressbar"-->
+                                                        <!--aria-valuenow="60" aria-valuemin="0" aria-valuemax="100"-->
+                                                        <!--style="width: {{element.sta_info[index]}}%;">-->
+                                                        <!--</div>-->
+                                                        <!--</div>-->
+                                                    </div>
+                                                </form>
+                                                <!-- end ngRepeat: option in editDg.qoptions -->
+                                            </div>
+                                            <!--投票成功-->
+                                            <!--<div class="vote-btn" ng-if="element.voted">投票成功</div>-->
+                                            <div class="vote-btn" ng-if="!element.voted">
+                                                <button class="btn btn-sm" ng-click="vote(element._id)">投票</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {{voteInfo}}
+                                <div class="row">
+                                    <div class="input-group" style="width: 800px">
+                                        <input ng-model="url" placeholder="请输入视频链接，点击播放" class="form-control" >
+                                    <span class="input-group-btn">
+                                        <button class="btn btn-primary btn-flat ng-isolate-scope" ng-click="seturl()">确定</button>
+                                    </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <label>*选择您所要使用的样式,在视频中点击添加</label>
+                                <a href="#topic_vote_modal1" class="row" data-toggle="modal">
+                                    <!--<img src="images/blue.png" alt="sample_blue" width="280" height="300" style="border-radius: 5px">-->
+                                    <div class="style-preview-box">
+                                        <div class="style-preview style-{{current_pattern.color}}">
+                                            <div style="background-image: url({{current_pattern.pic}})" class="banner"></div>
+                                            <div class="question" ng-bind="current_pattern.title"></div>
+                                            <!--<div class="question">{{current_pattern.title}}</div>-->
+                                            <div class="options">
+                                                <!-- ngRepeat: option in editDg.qoptions -->
+                                                <div ng-repeat="option in current_pattern.options track by $index" class="option ng-scope" style="">
+                                                    <label>
+                                                        <input type="radio" name="option">
+                                                        <span class="ng-binding">{{option}}</span>
+                                                    </label>
+                                                </div>
+                                                <!-- end ngRepeat: option in editDg.qoptions -->
+                                            </div>
+                                            <div class="vote-btn">
+                                                <button class="btn btn-sm">投票</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </a>
+                                <div class="form-group">
+                                    <div class="radio">
+                                        <label>
+                                            <input type="radio" ng-model="current_pattern.color" value="0">红色
+                                            <img src="images/red.jpg" alt="red">
+                                        </label>
+                                    </div>
+                                    <div class="radio">
+                                        <label>
+                                            <input type="radio" ng-model="current_pattern.color" value="1">蓝色
+                                            <img src="images/blue.jpg" alt="blue">
+                                        </label>
+                                    </div>
+                                    <div class="radio">
+                                        <label>
+                                            <input type="radio" ng-model="current_pattern.color" value="2">绿色
+                                            <img src="images/green.jpg" alt="green">
+                                        </label>
+                                    </div>
+                                    <div class="radio">
+                                        <label>
+                                            <input type="radio" ng-model="current_pattern.color" value="3">黑色
+                                            <img src="images/black.jpg" alt="black">
+                                        </label>
+                                    </div>
+                                </div>
+                                <!--<a href="#topic_vote_modal2" class="row" data-toggle="modal">-->
+                                    <!--<img src="images/red.png" alt="sample_red" width="280" height="300" style="border-radius: 5px">-->
+                                <!--</a>-->
+                            </div>
+                        </div>
+                    </div>
+                    <popup ng-if="bubble.open" close="bubble.open=false" close-action="esc outerchick">
+                        <button class="btn-success ui-popup-bottom-left" ng-click="bubble.open = false;add_element()">确认添加?</button>
+                    </popup>
+                    <!--话题投票编辑框-->
+                    <div class="modal fade" id="topic_vote_modal1" tabindex="-1" role="sample1">
+                        <div class="modal-dialog" style="width: 70%">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h4 class="modal-title">
+                                        编辑话题投票
+                                    </h4>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="row clearfix">
+                                        <div class="col-sm-7">
+                                            <!--投票问题-->
+                                            <form class="form-horizontal" name="topicvoteForm">
+                                                <div class="form-group">
+                                                    <label for="topic_vote_s1_question" class="col-sm-2">投票问题</label>
+                                                    <div class="col-sm-10">
+                                                        <input type="text" class="form-control" id="topic_vote_s1_question" ng-model="current_pattern.title" required>
+                                                        <span style="color:red" ng-show="!current_pattern.title">
+                                                            <span>请输入投票问题</span>
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                            <!--投票答案-->
+                                            <form class="form-horizontal">
+                                                <div class="form-group">
+                                                    <div ng-repeat="option in current_pattern.options track by $index">
+                                                        <label for="topic_vote_s1_anwser"+{{$index + 1}} class="col-sm-2">选项{{$index + 1}}</label>
+                                                        <div class="col-sm-4">
+                                                            <div class="input-group">
+                                                                <input type="text" class="form-control" id="topic_vote_s1_anwser"+{{$index + 1}} ng-model="current_pattern.options[$index]" required>
+                                                <span class="input-group-addon btn" ng-click="delete_option($index)">
+                                                    x
+                                                </span>
+                                                            </div>
+                                            <span style="color:red" ng-show="!current_pattern.options[$index]">
+                                                <span>请输入选项内容</span>
+                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                            <!--添加选项-->
+                                            <div class="row">
+                                                <div class="col-sm-4 col-sm-offset-2">
+                                                    <a href="" ng-click="add_option(current_pattern.options.length+1)">+添加选项</a>
+                                                </div>
+                                            </div>
+                                            <p></p>
+                                            <!--广告插图-->
+                                            <div class="row">
+                                                <div class="col-sm-2">
+                                                    <label for="topic_vote_s1_photo">广告图片</label>
+                                                </div>
+                                                <div class="col-sm-10">
+                                                    <!--<img class="btn" ng-src={{current_pattern.pic}} width="100%" height="100px" style="padding: 0" id="topic_vote_s1_photo"/>-->
+                                                    <!--<input type="file" file-model="myFile" ngf-select="" ngf-pattern="'image/*'" ngf-multiple="false" ng-model="current_pattern.pic_file"/>-->
+                                                    <img ngf-src="pic_file || default_pic" width="100%" height="100px" style="padding: 0"/>
+                                                    <input type="file" class="button" file-model="myFile" ngf-select ngf-pattern="'image/*'" ngf-multiple="false" ng-model="pic_file">
+                                                </div>
+                                            </div>
+                                            <!--元素名称-->
+                                            <div class="row">
+                                                <div class="col-sm-2">
+                                                    <label>元素名称</label>
+                                                </div>
+                                                <div class="col-sm-10">
+                                                    <input type="text" class="form-control" ng-model="current_pattern.name">
+                                                </div>
+                                            </div>
+                                            <p></p>
+                                            <!--外部链接-->
+                                            <form class="form-horizontal">
+                                                <div class="form-group">
+                                                    <label for="topic_vote_s1_link" class="col-sm-2">外部链接</label>
+                                                    <div class="col-sm-10">
+                                                        <input type="text" class="form-control" id="topic_vote_s1_link" ng-model="current_pattern.link" required>
+                                        <span style="color:red" ng-show="!current_pattern .link">
+                                                <span>请输入链接地址</span>
+                                            </span>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                            <!--投票起止时间-->
+                                            <form class="form-horizontal">
+                                                <div class="form-group">
+                                                    <label class="col-sm-2">投票开启时间</label>
+                                                    <div class="col-sm-4">
+                                                        <input type="date" id="topic_vote_s1_startdate" ng-model="current_pattern.start_time" required><br>
+                                        <span style="color:red" ng-show="!current_pattern.start_time">
+                                            <span>请输入开始时间</span>
+                                        </span>
+                                                    </div>
+                                                    <label class="col-sm-2">投票截止时间</label>
+                                                    <div class="col-sm-4">
+                                                        <input type="date" id="topic_vote_s1_enddate" ng-model="current_pattern.end_time" required><br>
+                                        <span style="color:red" ng-show="!current_pattern.end_time">
+                                            <span>请输入结束时间</span>
+                                        </span>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                        <!--缩略图-->
+                                        <div class="col-sm-5">
+                                            <div class="style-preview-box">
+                                                <div class="style-preview style-{{current_pattern.color}}">
+                                                    <div style="background-image: url({{current_pattern.pic}})" class="banner"></div>
+                                                    <!--<div style="background-image: url({{current_pattern.pic.$ngfBlobUrl}})" class="banner"></div>-->
+                                                    <div class="question" ng-bind="current_pattern.title"></div>
+                                                    <div class="options">
+                                                        <!-- ngRepeat: option in editDg.qoptions -->
+                                                        <div ng-repeat="option in current_pattern.options track by $index" class="option ng-scope" style="">
+                                                            <label>
+                                                                <input type="radio" name="option">
+                                                                <span class="ng-binding">{{option}}</span>
+                                                            </label>
+                                                        </div>
+                                                        <!-- end ngRepeat: option in editDg.qoptions -->
+                                                    </div>
+                                                    <div class="vote-btn">
+                                                        <button class="btn btn-sm">投票</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <!--<div class="thumbnail">-->
+                                            <!--<div class="caption">-->
+                                            <!--<h>样式预览</h>-->
+                                            <!--</div>-->
+                                            <!--<img src="images/blue.png" alt="">-->
+                                            <!--</div>-->
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-default" data-dismiss="modal">
+                                        关闭
+                                    </button>
+                                    <button type="button" class="btn btn-primary" data-dismiss="modal" ng-disabled="!current_pattern.title || !current_pattern.options[current_pattern.options.length-1] || !current_pattern.pic || !current_pattern.link || !current_pattern.start_time || !current_pattern.end_time">
+                                        确认
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!--卡片投票-->
+                <div class="tab-pane container-fluid" id="card_vote">
+                    <div class="page-header">
+                        <h1>卡片投票</h1>
+                    </div>
+                    <div class="media">
+                        <div class="col-sm-2">
+
+                        </div>
+                        <div class="col-sm-8">
+                            <video id="card_vote_video" src="video/sample.mp4" controls="controls" width="800" height="600" style="border-radius: 5px"></video>
+                            <div class="input-group" style="width: 800px">
+                                <input ng-model="videoUrl" placeholder="请输入视频链接，点击播放" class="form-control ng-valid ng-touched ng-dirty ng-valid-parse" >
+                                    <span class="input-group-btn">
+                                        <button iva="iva" app-key="VkIzRKlhb" video-url="http://v.youku.com/v_show/id_XMTgyMjQ5Nzc3Mg==.html" is-live="isLive" class="btn btn-primary btn-flat ng-isolate-scope">确定</button>
+                                    </span>
+                            </div>
+                        </div>
+                        <div class="col-sm-2">
+
+                        </div>
+                    </div>
+                </div>
+                <!--云图云窗-->
+                <div class="tab-pane container-fluid" id="cloud_picture" ng-controller="cloudPicture">
+                    <div class="page-header">
+                        <h1>云图云窗</h1>
+                    </div>
+                    <div class="media">
+                        <div class="row">
+                            <div class="col-sm-8">
+                                <video id="" src={{video_url}} controls="controls" width="800" height="600" style="border-radius: 5px"></video>
+                                <div class="input-group" style="width: 800px">
+                                    <input ng-model="url" placeholder="请输入视频链接，点击播放" class="form-control ng-valid ng-touched ng-dirty ng-valid-parse" >
+                                    <span class="input-group-btn">
+                                        <button class="btn btn-primary btn-flat ng-isolate-scope" ng-click="seturl()">确定</button>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="col-sm-4">
+                                <div class="row">
+                                    <label>*样式列表</label>
+                                    <a href="javascript:;" class="file pull-right" style="margin-right: 20px">
+                                        <input type="file" file-model="myFile" ngf-select ngf-pattern="'image/*'" ngf-multiple="false" ng-model="new_element.pic_file" ng-click="add_element()">添加云图
+                                    </a>
+                                </div>
+                                <div class="row rightDiv">
+                                    <!--<a href="#cloud_photo_modal1" class="row" data-toggle="modal">-->
+                                        <!--<img src="images/baike.png" alt="baike_sample1" width="95%" style="border-radius: 5px">-->
+                                    <!--</a>-->
+                                    <a href="#{{element.name}}" class="row" data-toggle="modal" ng-repeat="element in cloudInfo">
+                                        <img src={{element.pic}} width="95%" style="border-radius: 5px">
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!--云图云窗编辑框-->
+                    <div class="modal fade" id="element.name" ng-repeat="element in cloudInfo">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h4 class="modal-title">
+                                        编辑云图
+                                    </h4>
+                                </div>
+                                <div class="modal-body">
+                                    <form class="form-horizontal">
+                                        <div class="form-group">
+                                            <div class="col-sm-2 col-sm-offset-1">
+                                                <label>图片</label>
+                                            </div>
+                                            <div class="col-sm-9">
+                                                <img src="" alt="点击上传照片" style="width: 400px; height: 300px;">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="col-sm-2 col-sm-offset-1">
+                                                <label>云图标题</label>
+                                            </div>
+                                            <div class="col-sm-9">
+                                                <input type="text" class="form-control" id="cloud_photo_title1" placeholder="title">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="col-sm-2 col-sm-offset-1">
+                                                <label>云图介绍</label>
+                                            </div>
+                                            <div class="col-sm-9">
+                                                <textarea type="text" class="form-control" id="cloud_photo_info1" placeholder="information"></textarea>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="col-sm-2 col-sm-offset-1">
+                                                <label>外部链接</label>
+                                            </div>
+                                            <div class="col-sm-9">
+                                                <input type="text" class="form-control" id="cloud_photo_link1" placeholder="www.baike.com">
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭
+                                    </button>
+                                    <button type="button" class="btn btn-primary">
+                                        确认
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!--广告云窗-->
+                <div class="tab-pane" id="ad_picture">
+                    <div class="page-header">
+                        <h1>广告</h1>
+                    </div>
+                    <div class="media">
+                        <div class="row">
+                            <div class="col-sm-8">
+                                <video id="cloud_photo_video" src="video/sample.mp4" controls="controls" width="800" height="600" style="border-radius: 5px"></video>
+                                <div class="input-group" style="width: 800px">
+                                    <input ng-model="videoUrl" placeholder="请输入视频链接，点击播放" class="form-control ng-valid ng-touched ng-dirty ng-valid-parse" >
+                                    <span class="input-group-btn">
+                                        <button iva="iva" app-key="VkIzRKlhb" video-url="http://v.youku.com/v_show/id_XMTgyMjQ5Nzc3Mg==.html" is-live="isLive" class="btn btn-primary btn-flat ng-isolate-scope">确定</button>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="col-sm-4">
+                                <label>*选择您所要使用的样式,在视频中点击添加</label>
+                                <a href="#ad_photo_modal1" class="row" data-toggle="modal">
+                                    <img src="images/guanggao.png" alt="baike_sample1" width="100%" style="border-radius: 5px">
+                                </a>
+                                <a href="#ad_photo_modal2" class="row" data-toggle="modal">
+                                    <img src="images/guanggao.png" alt="baike_sample2" width="100%" style="border-radius: 5px">
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!--视频统计-->
+                <div class="tab-pane" id="play_count">
+                    <div class="page-header">
+                        <h1>视频统计</h1>
+                    </div>
+                    <div class="row container-fluid clearfix">
+                        <div class="col-xs-6 col-sm-3 data-box">
+                            <div class="data-box-title">100</div>
+                            <div class="data-box-data">视频播放量</div>
+                        </div>
+                        <div class="col-xs-6 col-sm-3 data-box-sum">
+                            <div class="data-box-title">100</div>
+                            <div class="data-box-data">热点曝光率</div>
+                        </div>
+                        <div class="col-xs-6 col-sm-3 data-box-hot-point">
+                            <div class="data-box-title">100</div>
+                            <div class="data-box-data">热点点击量</div>
+                        </div>
+                        <div class="col-xs-6 col-sm-3 data-box-hot-point">
+                            <div class="data-box-title">100</div>
+                            <div class="data-box-data">热点点击率</div>
+                        </div>
+                        <div class="col-xs-6 col-sm-3 data-box">
+                            <div class="data-box-title">100</div>
+                            <div class="data-box-data">视频播放UV</div>
+                        </div>
+                        <div class="col-xs-6 col-sm-3 data-box-sum">
+                            <div class="data-box-title">100</div>
+                            <div class="data-box-data">热点点击UV</div>
+                        </div>
+                        <div class="col-xs-6 col-sm-3 data-box-link">
+                            <div class="data-box-title">100</div>
+                            <div class="data-box-data">外链曝光量</div>
+                        </div>
+                        <div class="col-xs-6 col-sm-3 data-box-link">
+                            <div class="data-box-title">100</div>
+                            <div class="data-box-data">外链点击率</div>
+                        </div>
+                    </div>
+                    <div class="row container-fluid clearfix">
+                        <div class="table-responsive">
+                            <table class="table">
+                                <caption>统计数据</caption>
+                                <thead>
+                                <tr>
+                                    <th>日期</th>
+                                    <th>视频id</th>
+                                    <th>视频播放量</th>
+                                    <th>热点曝光量</th>
+                                    <th>热点点击量</th>
+                                    <th>热点点击率</th>
+                                    <th>信息层曝光量</th>
+                                    <th>信息点击量</th>
+                                    <th>信息层点击率</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr class="success">
+                                    <td>09/11/2016</td>
+                                    <td>#000001</td>
+                                    <td>10000</td>
+                                    <td>1000</td>
+                                    <td>5000</td>
+                                    <td>16.94%</td>
+                                    <td>2000</td>
+                                    <td>1300</td>
+                                    <td>40.94%</td>
+                                </tr>
+                                <tr class="success">
+                                    <td>09/11/2016</td>
+                                    <td>#000001</td>
+                                    <td>10000</td>
+                                    <td>1000</td>
+                                    <td>5000</td>
+                                    <td>16.94%</td>
+                                    <td>2000</td>
+                                    <td>1300</td>
+                                    <td>40.94%</td>
+                                </tr>
+                                <tr class="success">
+                                    <td>09/11/2016</td>
+                                    <td>#000001</td>
+                                    <td>10000</td>
+                                    <td>1000</td>
+                                    <td>5000</td>
+                                    <td>16.94%</td>
+                                    <td>2000</td>
+                                    <td>1300</td>
+                                    <td>40.94%</td>
+                                </tr>
+                                <tr class="success">
+                                    <td>09/11/2016</td>
+                                    <td>#000001</td>
+                                    <td>10000</td>
+                                    <td>1000</td>
+                                    <td>5000</td>
+                                    <td>16.94%</td>
+                                    <td>2000</td>
+                                    <td>1300</td>
+                                    <td>40.94%</td>
+                                </tr>
+                                <tr class="success">
+                                    <td>09/11/2016</td>
+                                    <td>#000001</td>
+                                    <td>10000</td>
+                                    <td>1000</td>
+                                    <td>5000</td>
+                                    <td>16.94%</td>
+                                    <td>2000</td>
+                                    <td>1300</td>
+                                    <td>40.94%</td>
+                                </tr>
+                                <tr class="success">
+                                    <td>09/11/2016</td>
+                                    <td>#000001</td>
+                                    <td>10000</td>
+                                    <td>1000</td>
+                                    <td>5000</td>
+                                    <td>16.94%</td>
+                                    <td>2000</td>
+                                    <td>1300</td>
+                                    <td>40.94%</td>
+                                </tr>
+                                <tr class="success">
+                                    <td>09/11/2016</td>
+                                    <td>#000001</td>
+                                    <td>10000</td>
+                                    <td>1000</td>
+                                    <td>5000</td>
+                                    <td>16.94%</td>
+                                    <td>2000</td>
+                                    <td>1300</td>
+                                    <td>40.94%</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="divider" style="border-bottom: 2px solid #eee"></div>
+                    <div class="row container-fluid clearfix">
+                        <caption>热点转换分析</caption>
+                        <div id="hotpoint_ana" style="width: 88%" ></div>
+                    </div>
+                    <div class="divider" style="border-bottom: 2px solid #eee"></div>
+                    <div class="row container-fluid clearfix">
+                        <caption>信息层转化效果分析</caption>
+                        <div id="info_ana" style="width: 88%"></div>
+                    </div>
+                    <div class="divider" style="border-bottom: 2px solid #eee"></div>
+                    <div class="row container-fluid clearfix">
+                        <caption>用户类型分析</caption>
+                        <div id="user_ana" style="width: 88%;"></div>
+                    </div>
+                </div>
+                <div class="tab-pane" id="point_count">
+                    <div class="page-header">
+                        <h1>热点统计</h1>
+                    </div>
+                </div>
+                <div class="tab-pane" id="link_count" ng-controller="linkCount">
+                    <div class="page-header">
+                        <h1>外链统计</h1>
+                    </div>
+                </div>
+                <div class="tab-pane" id="info_count">
+                    <div class="page-header">
+                        <h1>栏目统计</h1>
+                    </div>
+                </div>
+                <div class="tab-pane" id="user_admin">
+                    <div class="page-header">
+                        <h1>终端管理</h1>
+                    </div>
+                </div>
+                <div class="tab-pane" id="project_setting">
+                    <div class="page-header">
+                        <h1>项目设置</h1>
+                    </div>
+                </div>
+                <div class="tab-pane container-fluid" id="element_admin" ng-controller="elementAdmin">
+                    <div class="page-header">
+                        <h1>元素管理</h1>
+                    </div>
+                    <div>
+                        <table class="table table-striped">
+                            <caption>项目信息管理</caption>
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>元素id</th>
+                                    <th>元素类型</th>
+                                    <th>开启时间</th>
+                                    <th>终止时间</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="element in voteInfo">
+                                    <td>{{$index+1}}</td>
+                                    <td>{{element._id}}</td>
+                                    <td>{{element.kind}}</td>
+                                    <td>{{element.start_time}}</td>
+                                    <td>{{element.end_time}}</td>
+                                    <td><button ng-click="delete(element._id)">删除</button></td>
+                                    <!--<td href="#project.project_id" data-toggle="collapse">项目详情<span class="caret"></span></td>-->
+                                </tr>
+                            {{elements}}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="tab-pane" id="help">
+                    <div class="page-header">
+                        <h1>常见问题</h1>
+                    </div>
+                </div>
+            </div>
+    </div>
+    <!--确认窗口-->
+    <div class="modal fade" id="confirm_window" tabindex="-1" >
+        <div class="modal-dialog" style="width: 30%">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">
+                        选择样式
+                    </h4>
+                </div>
+                <!--改成ng-repeat-->
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary btn-block" ng-click="add_point()" data-dismiss="modal">
+                        确认添加
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="ad_photo_modal1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">
+                        编辑云图
+                    </h4>
+                </div>
+                <div class="modal-body">
+                    <form class="form-horizontal">
+                        <div class="form-group">
+                            <div class="col-sm-2 col-sm-offset-1">
+                                <label>广告图片</label>
+                            </div>
+                            <div class="col-sm-9">
+                                <img src="" alt="点击上传照片" style="width: 400px; height: 300px;">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-sm-2 col-sm-offset-1">
+                                <label>商品图片</label>
+                            </div>
+                            <div class="col-sm-9">
+                                <img src="" alt="点击上传图片" style="width: 200px; height: 150px;">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-sm-2 col-sm-offset-1">
+                                <label>广告标题</label>
+                            </div>
+                            <div class="col-sm-9">
+                                <input type="text" id="cloud_photo_title2" placeholder="title">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-sm-2 col-sm-offset-1">
+                                <label>广告备注</label>
+                            </div>
+                            <div class="col-sm-9">
+                                <input type="text" id="cloud_photo_info2" placeholder="information">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-sm-2 col-sm-offset-1">
+                                <label>商品链接</label>
+                            </div>
+                            <div class="col-sm-9">
+                                <input type="text" id="cloud_photo_link2" placeholder="www.baike.com">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭
+                    </button>
+                    <button type="button" class="btn btn-primary">
+                        确认
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--注册窗口-->
+    <div class="modal fade" id="register" ng-controller="Register">
+        <div class="modal-dialog">
+            <div class="modal-content" ng-show="!isAuthenticated">
+                <div class="modal-header" ng-show="!illegal">
+                    <h1 style="text-align: center">注册账号</h1>
+                </div>
+                <div class="modal-header" ng-show="illegal">
+                    <h1 style="text-align: center">账号已被使用,请重新注册</h1>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="form-group">
+                            <label>用户账号</label>
+                            <input type="text" class="form-control" ng-model="register.username" id="account" placeholder="请输入您的账号">
+                        </div>
+                        <div class="form-group">
+                            <label>用户密码</label>
+                            <input type="password" class="form-control" ng-model="register.password" id="passsword" placeholder="请输入您的密码">
+                        </div>
+                        <!--<div class="form-group">-->
+                            <!--<label>用户密码</label>-->
+                            <!--<input type="password" class="form-control" ng-model="pwd_confirm" id="passsword_confirm" placeholder="请确认您的密码">-->
+                        <!--</div>-->
+                        <p class="text-warning" ng-if="regiser.password==pwd_confirm">两次输入的密码不一致</p>
+                        <button type="submit" ng-click="submit()" class="btn btn-block btn-primary">提交</button>
+                    </form>
+                </div>
+            </div>
+            <div class="modal-content" ng-show="isAuthenticated">
+                <div class="modal-header">
+                    <h1 style="text-align: center">注册成功,已自动登录</h1>
+                </div>
+                <div>
+                    <h2 style="text-align: center">欢迎你{{User}}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--登录窗口-->
+    <div class="modal fade" id="login" ng-controller="Login">
+        <div class="modal-dialog">
+            <div class="modal-content" ng-show="!isAuthenticated">
+                <div class="modal-header" ng-show="!loginerror">
+                    <h1 style="text-align: center">用户登录</h1>
+                </div>
+                <div class="modal-header" ng-show="loginerror">
+                    <h1 style="text-align: center">账号或密码错误,请重新登录</h1>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="form-group">
+                            <label for="account">用户账号</label>
+                            <input type="text" class="form-control" ng-model="user.username" id="login_account" placeholder="请输入您的账号">
+                        </div>
+                        <div class="form-group">
+                            <label for="passsword">用户密码</label>
+                            <input type="password" class="form-control" ng-model="user.password" id="login_passsword" placeholder="请输入您的密码">
+                        </div>
+                        <button type="submit" ng-click="submit()" class="btn btn-block btn-primary">确定</button>
+                    </form>
+                </div>
+            </div>
+            <div class="modal-content" ng-show="isAuthenticated">
+                <div class="modal-header">
+                    <h1 style="text-align: center">登陆成功</h1>
+                </div>
+                <div>
+                    <h2 style="text-align: center">欢迎你{{User}}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--新建项目-->
+    <div class="modal fade" id="createProject" ng-controller="createProject">
+        <div class="modal-dialog">
+            <div class="modal-content" ng-if="!create_success">
+                <div class="modal-header">
+                    <h4 class="modal-title">
+                        新建项目
+                    </h4>
+                </div>
+                <!--改成ng-repeat-->
+                <div class="modal-body">
+                    <form>
+                        <div class="form-group">
+                            <label>项目名称</label>
+                            <input type="text" class="form-control" placeholder="请输入项目名称">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary btn-block" ng-click="add_point()" data-dismiss="modal">
+                        确认
+                    </button>
+                </div>
+            </div>
+            <div class="modal-content" ng-if="create_success">
+                <div class="modal-header">
+                    <h4 class="modal-title">
+                        新建项目成功
+                    </h4>
+                </div>
+                <!--改成ng-repeat-->
+                <div class="modal-body">
+                    <form>
+                        <div class="form-group">
+                            <label>项目名称{{project_name}}</label>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary btn-block" ng-click="create_success=true" data-dismiss="modal">
+                        确认
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <!--<script src="js/lib/jquery.min.js"></script>-->
+    <script src="js/lib/jquery.min.js"></script>
+    <script src="http://cdn.bootcss.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <!--<script src="js/lib/angular.min.js"></script>-->
+    <script src="http://cdn.static.runoob.com/libs/angular.js/1.4.6/angular.min.js"></script>
+    <script src="js/lib/angular-popups.js"></script>
+    <script src="js/Highcharts/code/highcharts.js"></script>
+    <script src="js/Highcharts/code/highcharts-more.js"></script>
+    <script src="js/Highcharts/code/modules/exporting.js"></script>
+    <script src="js/lib/ng-file-upload.min.js"></script>
+    <!--<script src="js/initial.js"></script>-->
+    <script src="js/video++.js"></script>
+    <!--<video-customer></video-customer>-->
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <!--浏览器分布-->
+    <script type="text/javascript">
+        google.charts.load('current', {'packages':['corechart']});
+        google.charts.setOnLoadCallback(drawChart);
+        function drawChart() {
+
+            var data = google.visualization.arrayToDataTable([
+                ['Task', 'Hours per Day'],
+                ['Chrome',     11],
+                ['Firefox',      2],
+                ['Safari',  2],
+                ['360浏览器', 2],
+                ['QQ浏览器',    7],
+                ['遨游浏览器',   3]
+            ]);
+
+            var options = {
+                title: '用户浏览器分布',
+                pieHole: 0.4
+            };
+
+            var chart = new google.visualization.PieChart(document.getElementById('browser'));
+
+            chart.draw(data, options);
+        }
+    </script>
+    <!--用户设备-->
+    <script type="text/javascript">
+        google.charts.load('current', {'packages':['corechart']});
+        google.charts.setOnLoadCallback(drawChart);
+        function drawChart() {
+
+            var data = google.visualization.arrayToDataTable([
+                ['Task', 'Hours per Day'],
+                ['PC',     103],
+                ['MAC',      93],
+                ['iPhone',  55],
+                ['Android', 90],
+            ]);
+
+            var options = {
+                title: '用户设备分析',
+                pieHole: 0.4
+            };
+
+            var chart = new google.visualization.PieChart(document.getElementById('device'));
+
+            chart.draw(data, options);
+        }
+    </script>
+    <!--用户上线时间-->
+    <script type="text/javascript">
+        google.charts.load('current', {'packages':['corechart']});
+        google.charts.setOnLoadCallback(drawVisualization);
+
+
+        function drawVisualization() {
+            // Some raw data (not necessarily accurate)
+            var data = google.visualization.arrayToDataTable([
+                ['上线时间',     '学生',   '上班族',    '程序员'],
+                ['00:00-04:00',  165,      938,         522],
+                ['04:00-08:00',  135,      1120,        599],
+                ['08:00-12:00',  157,      1167,        587],
+                ['12:00-16:00',  139,      1110,        615],
+                ['16:00-20:00',  136,      691,         629],
+                ['20:00-24:00',  100,      200,         200]
+            ]);
+
+            var options = {
+                title : '用户上线时间与数量',
+                vAxis: {title: '上线人数'},
+                hAxis: {title: '上线时间'},
+                seriesType: 'bars',
+                series: {5: {type: 'line'}}
+            };
+
+            var chart = new google.visualization.ComboChart(document.getElementById('online-time'));
+            chart.draw(data, options);
+        }
+    </script>
+    <!--用户操作系统-->
+    <script type="text/javascript">
+        google.charts.load('current', {'packages':['corechart']});
+        google.charts.setOnLoadCallback(drawChart);
+        function drawChart() {
+
+            var data = google.visualization.arrayToDataTable([
+                ['Task', 'Hours per Day'],
+                ['OSX',     790],
+                ['Windows',    900],
+                ['Ubuntu',  203],
+                ['CentOS', 204],
+            ]);
+
+            var options = {
+                title: '用户操作系统',
+                pieHole: 0.4
+            };
+
+            var chart = new google.visualization.PieChart(document.getElementById('user-os'));
+
+            chart.draw(data, options);
+        }
+    </script>
+    <!--视频统计表格-->
+    <script type="text/javascript">
+        $(function () {
+            Highcharts.chart('hotpoint_ana', {
+                chart: {
+                    zoomType: 'xy'
+                },
+                title: {
+                    text: '热点效果转换图'
+                },
+                subtitle: {
+                    text: ''
+                },
+                xAxis: [{
+                    categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                    crosshair: true
+                }],
+                yAxis: [{ // Primary yAxis
+                    labels: {
+                        format: '{value}%',
+                        style: {
+                            color: Highcharts.getOptions().colors[2]
+                        }
+                    },
+                    title: {
+                        text: '',
+                        style: {
+                            color: Highcharts.getOptions().colors[2]
+                        }
+                    },
+                    opposite: true
+
+                }, { // Secondary yAxis
+                    gridLineWidth: 0,
+                    title: {
+                        text: '',
+                        style: {
+                            color: Highcharts.getOptions().colors[0]
+                        }
+                    },
+                    labels: {
+                        format: '{value} 次',
+                        style: {
+                            color: Highcharts.getOptions().colors[0]
+                        }
+                    }
+
+                }, { // Tertiary yAxis
+                    gridLineWidth: 0,
+                    title: {
+                        text: '',
+                        style: {
+                            color: Highcharts.getOptions().colors[1]
+                        }
+                    },
+                    labels: {
+                        format: '{value} mb',
+                        style: {
+                            color: Highcharts.getOptions().colors[1]
+                        }
+                    },
+                    opposite: true
+                }],
+                tooltip: {
+                    shared: true
+                },
+                legend: {
+                    layout: 'vertical',
+                    align: 'left',
+                    left: 80,
+                    verticalAlign: 'top',
+                    top: 55,
+                    floating: true,
+                    backgroundColor: (Highcharts.theme && Highcharts.theme.legendBackgroundColor) || '#FFFFFF'
+                },
+                series: [{
+                    name: '视频播放量',
+                    type: 'column',
+                    yAxis: 1,
+                    data: [49.9, 71.5, 106.4, 129.2, 144.0, 176.0, 135.6, 148.5, 216.4, 194.1, 95.6, 54.4],
+                    tooltip: {
+                        valueSuffix: ' 次'
+                    }
+
+                },
+                    {
+                     name: '热点曝光率',
+                        type: 'column',
+                        yAxis: 1,
+                        data: [49.9, 71.5, 106.4, 129.2, 144.0, 176.0, 135.6, 148.5, 216.4, 194.1, 95.6, 54.4],
+                        tooltip: {
+                            valueSuffix: ' 次'
+                        }
+                },
+                    {
+                     name: '热点点击率',
+                    type: 'column',
+                    yAxis: 1,
+                    data: [49.9, 71.5, 106.4, 129.2, 144.0, 176.0, 135.6, 148.5, 216.4, 194.1, 95.6, 54.4],
+                    tooltip: {
+                        valueSuffix: ' 次'
+                    }
+                },
+                    {
+                    name: '热点转化率',
+                    type: 'spline',
+                    data: [7.0, 6.9, 9.5, 14.5, 18.2, 17.5,18, 16.3, 18.3, 18.3, 13.9, 9.6],
+                    tooltip: {
+                        valueSuffix: ' %'
+                    }
+                }]
+            });
+        });
+    </script>
+    <!--信息层统计表格-->
+    <script type="text/javascript">
+        $(function () {
+            Highcharts.chart('info_ana', {
+                chart: {
+                    zoomType: 'xy'
+                },
+                title: {
+                    text: '信息层转化效果分析'
+                },
+                subtitle: {
+                    text: ''
+                },
+                xAxis: [{
+                    categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                    crosshair: true
+                }],
+                yAxis: [{ // Primary yAxis
+                    labels: {
+                        format: '{value}%',
+                        style: {
+                            color: Highcharts.getOptions().colors[2]
+                        }
+                    },
+                    title: {
+                        text: '',
+                        style: {
+                            color: Highcharts.getOptions().colors[2]
+                        }
+                    },
+                    opposite: true
+
+                }, { // Secondary yAxis
+                    gridLineWidth: 0,
+                    title: {
+                        text: '',
+                        style: {
+                            color: Highcharts.getOptions().colors[0]
+                        }
+                    },
+                    labels: {
+                        format: '{value} 次',
+                        style: {
+                            color: Highcharts.getOptions().colors[0]
+                        }
+                    }
+
+                }, { // Tertiary yAxis
+                    gridLineWidth: 0,
+                    title: {
+                        text: '',
+                        style: {
+                            color: Highcharts.getOptions().colors[1]
+                        }
+                    },
+                    labels: {
+                        format: '{value} mb',
+                        style: {
+                            color: Highcharts.getOptions().colors[1]
+                        }
+                    },
+                    opposite: true
+                }],
+                tooltip: {
+                    shared: true
+                },
+                legend: {
+                    layout: 'vertical',
+                    align: 'left',
+                    left: 80,
+                    verticalAlign: 'top',
+                    top: 55,
+                    floating: true,
+                    backgroundColor: (Highcharts.theme && Highcharts.theme.legendBackgroundColor) || '#FFFFFF'
+                },
+                series: [{
+                    name: '信息层曝光量',
+                    type: 'column',
+                    yAxis: 1,
+                    data: [49.9, 71.5, 106.4, 129.2, 144.0, 176.0, 135.6, 148.5, 216.4, 194.1, 95.6, 54.4],
+                    tooltip: {
+                        valueSuffix: ' 次'
+                    }
+
+                },
+                    {
+                        name: '外链点击量',
+                        type: 'column',
+                        yAxis: 1,
+                        data: [49.9, 71.5, 106.4, 129.2, 144.0, 176.0, 135.6, 148.5, 216.4, 194.1, 95.6, 54.4],
+                        tooltip: {
+                            valueSuffix: ' 次'
+                        }
+                    },
+                    {
+                        name: '外链点击率',
+                        type: 'spline',
+                        data: [7.0, 6.9, 9.5, 14.5, 18.2, 17.5,18, 16.3, 18.3, 18.3, 13.9, 9.6],
+                        tooltip: {
+                            valueSuffix: ' %'
+                        }
+                    }]
+            });
+        });
+    </script>
+    <!--用户统计表格-->
+    <script type="text/javascript">
+        $(function () {
+            var chart = Highcharts.chart('user_ana', {
+
+                title: {
+                    text: '用户类型分析'
+                },
+
+                subtitle: {
+                    text: ''
+                },
+
+                xAxis: {
+                    categories: ['韩剧粉', '电影迷', '程序员', '游戏爱好者', '追星族', '资讯达人', '其他']
+                },
+
+                series: [{
+                    type: 'column',
+                    colorByPoint: true,
+                    data: [1032, 3423, 1056, 5435, 1449, 11897, 9678],
+                    showInLegend: false
+                }]
+
+            });
+        });
+    </script>
+</body>
+</html>

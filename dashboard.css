@@ -1,0 +1,325 @@
+/*
+ * Base structure
+ */
+
+/* Move down content because we have a fixed navbar that is 50px tall */
+body {
+    padding-top: 50px;
+}
+
+
+/*
+ * Global add-ons
+ */
+
+.sub-header {
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+/*
+ * Top navigation
+ * Hide default border to remove 1px line.
+ */
+.navbar-fixed-top {
+    border: 0;
+}
+
+.navbar {
+    margin: 0px;
+}
+
+
+/*
+ * Sidebar
+ */
+
+/* Hide for mobile, show later */
+.sidebar {
+    display: none;
+}
+@media (min-width: 768px) {
+    .sidebar {
+        width: 150px;
+        position: fixed;
+        top: 51px;
+        bottom: 0;
+        left: 0;
+        z-index: 1000;
+        display: block;
+        padding-left: 0px;
+        padding-right: 0px;;
+        overflow-x: hidden;
+        overflow-y: auto; /* Scrollable contents if viewport is shorter than content. */
+        background-color: #f5f5f5;
+        border-right: 1px solid #eee;
+    }
+}
+
+.sidebar img {
+    margin-right: 20px;
+}
+/*sidebar*/
+.sidebar-menu{
+    top: 0px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    margin-bottom: 20px;
+}
+
+.sidebar-menu h{
+    padding-left: 10px;
+    font-weight: bold;
+}
+
+.sidebar-menu a{
+    color: #000;
+    text-align: left;
+    padding-left: 10px;}
+
+
+/* Sidebar navigation */
+.nav-sidebar {
+    margin-right: -21px; /* 20px padding + 1px border */
+    margin-bottom: 20px;
+    margin-left: -20px;
+}
+.nav-sidebar > li > a {
+    padding-right: 0px;
+    padding-left: 0px;
+}
+.nav-sidebar > .active > a,
+.nav-sidebar > .active > a:hover,
+.nav-sidebar > .active > a:focus {
+    color: #fff;
+    background-color: #428bca;
+}
+
+/*sidebar-header*/
+.sidebar-header{
+    padding:10px;
+    padding-left: 15px;
+    padding-right: 25px;
+}
+
+/*
+ * Main content
+ */
+
+.main {
+    padding: 0px;
+}
+@media (min-width: 768px) {
+    .main {
+        padding: 0px;
+        margin-left: 150px;
+    }
+}
+.main .page-header {
+    margin-top: 0;
+}
+
+
+
+/*
+ * Placeholder dashboard ideas
+ */
+
+.placeholders {
+    margin-bottom: 30px;
+    text-align: center;
+}
+.placeholders h4 {
+    margin-bottom: 0;
+}
+.placeholder {
+    margin-bottom: 20px;
+}
+.placeholder img {
+    display: inline-block;
+    border-radius: 50%;
+}
+
+
+/*
+ * Data-box
+ */
+
+.data-box {
+    background: #00acde;
+    padding: 20px 40px;
+    border-radius: 6px;
+    width: 23%;
+    margin: 1%;
+    text-align: center;
+    color: #fff;
+}
+
+.data-box-hot-point {
+    background: #02cbac;
+    padding: 20px 40px;
+    border-radius: 6px;
+    width: 23%;
+    margin: 1%;
+    text-align: center;
+    color: #fff;
+}
+
+.data-box-link {
+    background: #7164bb;
+    padding: 20px 40px;
+    border-radius: 6px;
+    width: 23%;
+    margin: 1%;
+    text-align: center;
+    color: #fff;
+}
+
+.data-box-sum {
+    background: #07e9c4;
+    padding: 20px 40px;
+    border-radius: 6px;
+    width: 23%;
+    margin: 1%;
+    text-align: center;
+    color: #fff;
+}
+
+.data-box-title {
+    padding:10px 20px;
+    line-height:1;
+    font-size:32px
+}
+
+.data-box-data {
+    padding:10px 10px;
+    font-weight:100;
+    font-size:17px;
+}
+
+
+
+/*
+ * modal
+ */
+
+.modal label {
+    margin:0;
+    padding-bottom: 7px;
+    padding-top: 7px;
+}
+
+/*
+ * thumbil
+ */
+
+.style-preview-box{margin-top:5px;margin-bottom:10px;height:370px;background-color:#eee;border:1px #777 dashed}
+.style-preview-box .style-preview{width:270px;margin:auto;color:#fff}
+.style-preview-box .style-preview.style-0 .question{background-color:#851a1f}
+.style-preview-box .style-preview.style-0 .options,.style-preview-box .style-preview.style-0 .vote-btn{background-color:#bd1e20}
+.style-preview-box .style-preview.style-1 .question{background-color:#085289}
+.style-preview-box .style-preview.style-1 .options,.style-preview-box .style-preview.style-1 .vote-btn{background-color:#1766a6}
+.style-preview-box .style-preview.style-2 .question{background-color:#1d6835}
+.style-preview-box .style-preview.style-2 .options,
+.style-preview-box .style-preview.style-2 .vote-btn{background-color:#348739}
+.style-preview-box .style-preview.style-3 .question{background-color:#343a3e}
+.style-preview-box .style-preview.style-3 .options,.style-preview-box .style-preview.style-3 .vote-btn{background-color:rgba(0,0,0,.5)}
+.style-preview-box .style-preview .banner{width:270px;height:65px;position:relative;background-position:left;background-repeat:no-repeat;background-size:contain;margin-left:-23px;margin-bottom:-13px}
+.style-preview-box .style-preview .question{height:70px;padding:15px;border-top-left-radius:10px;border-top-right-radius:10px;font-weight:700;overflow-y:auto;word-break:break-all}
+.style-preview-box .style-preview .options{padding:10px 15px 0;height:160px;word-break:break-all;overflow-y:auto}
+.style-preview-box .style-preview .vote-btn{border-bottom-left-radius:10px;border-bottom-right-radius:10px;height:40px;text-align:center}
+.style-preview-box .style-preview .vote-btn .btn{font-weight:700;padding:3px 30px;border:1px solid #fff;background-color:inherit}
+.style-preview-box .style-preview .vote-btn .btn:hover{color:inherit}
+
+.preview-box{margin-top:5px;margin-bottom:10px;height:250px;border:1px #777 dashed}
+.preview-box .style-preview{width:150px;margin:auto;color:#fff}
+.preview-box .style-preview.style-0 .question{background-color:#851a1f}
+.preview-box .style-preview.style-0 .options,
+.preview-box .style-preview.style-0 .vote-btn{background-color:#bd1e20}
+.preview-box .style-preview.style-1 .question{background-color:#085289}
+.preview-box .style-preview.style-1 .options,
+.preview-box .style-preview.style-1 .vote-btn{background-color:#1766a6}
+.preview-box .style-preview.style-2 .question{background-color:#1d6835}
+.preview-box .style-preview.style-2 .options,
+.preview-box .style-preview.style-2 .vote-btn{background-color:#348739}
+.preview-box .style-preview.style-3 .question{background-color:#343a3e}
+.preview-box .style-preview.style-3 .options,
+.preview-box .style-preview.style-3 .vote-btn{background-color:rgba(0,0,0,.5)}
+.preview-box .style-preview .banner{width:150px;height:65px;position:relative;background-position:left;background-repeat:no-repeat;background-size:contain;margin-left:-23px;margin-bottom:-13px}
+.preview-box .style-preview .question{height:50px;padding:15px;border-top-left-radius:10px;border-top-right-radius:10px;font-weight:700;overflow-y:auto;word-break:break-all}
+.preview-box .style-preview .options{padding:10px 15px 0;height:90px;word-break:break-all;overflow-y:auto}
+.preview-box .style-preview .vote-btn{border-bottom-left-radius:10px;border-bottom-right-radius:10px;height:40px;text-align:center}
+.preview-box .style-preview .vote-btn .btn{font-weight:700;padding:3px 30px;border:1px solid #fff;background-color:inherit}
+.preview-box .style-preview .vote-btn .btn:hover{color:inherit}
+
+.cloud-photo{
+    top: 0px;
+    left:0px;
+    position: absolute;
+    z-index: 100;
+    background: rgba(0, 0, 0, 0.5);
+}
+.cloud-photo.img-round{
+    top:12%;
+    left:12%;
+    width: 80%;
+    height:70%;
+    background: rgba(0, 0, 0, 0.7);
+}
+.cloud-photo.img-round.style-0{
+    background-color: #000000;
+}
+.cloud-photo.img-round.style-0{
+    background-color: #000000;
+}
+.cloud-photo.img-round.style-0{
+    background-color: #000000;
+}
+.cloud-photo.img-round.style-0{
+    background-color: #000000;
+}
+
+/*
+    文件选择按钮
+*/
+.file {
+    padding: 4px 10px;
+    height: 30px;
+    line-height: 20px;
+    position: relative;
+    cursor: pointer;
+    color: #888;
+    background: #fafafa;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    overflow: hidden;
+    display: inline-block;
+    *display: inline;
+    *zoom: 1
+}
+
+.file  input {
+    position: absolute;
+    font-size: 100px;
+    right: 0;
+    top: 0;
+    opacity: 0;
+    filter: alpha(opacity=0);
+    cursor: pointer
+}
+
+.file:hover {
+    color: #444;
+    background: #eee;
+    border-color: #ccc;
+    text-decoration: none
+}
+
+/*
+    右侧栏
+*/
+.rightDiv {
+    height:100%;
+    overflow: auto;
+    position: fixed;
+}
