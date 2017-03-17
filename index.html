@@ -12,10 +12,6 @@
     <!-- Bootstrap core CSS -->
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="dashboard.css" rel="stylesheet">
-    <!--<link rel="stylesheet" href="http://at.alicdn.com/t/font_pe1r84ob40rx80k9.css">-->
-    <!---->
-    <!--<link rel="stylesheet" href="app.css">-->
-
 
     <style type="text/css">
         .icon {
@@ -73,9 +69,14 @@
                                 <!--<li><a href="#my-project">我的项目</a></li>-->
                                 <li><a href="" class="disabled">{{current_project.project_name}}</a></li>
                                 <li class="divider"></li>
-                                <li><a href="#{{project.project_name}}" ng-click="change_project(project)" ng-repeat="project in projects">{{project.project_name}}</a></li>
-                                <li class="divider"></li>
                                 <li><a href="#createProject" data-toggle="modal" ng-click="dialog={open: true}">新建项目</a></li>
+                                <li class="divider"></li>
+                                <li ng-repeat="project in projects">
+                                    <a class="col-sm-8" href="#{{project.project_name}}" ng-click="change_project(project)">{{project.project_name}}</a>
+                                    <div class="col-sm-4">
+                                        <button href="#delete_confirm" data-toggle="modal" class="pull-right" ng-click="delete_project(project.project_id)" style="z-index: 2;">x</button>
+                                    </div>
+                                </li>
                                 <!--<dialog ng-if="dialog.open" modal close="dialog.open=false" ng-controller="createProject">-->
                                     <!--<div>-->
                                     <!--&lt;!&ndash;<div ng-if="create_success==false">&ndash;&gt;-->
@@ -111,10 +112,6 @@
                     <!--<li><a class="nav-pills" data-toggle="tab" href="#element_admin" ng-click="element_info()"><img src="images/terminal_icon.png" alt="" width="16" height="16"><span>元素管理</span></a></li>-->
                     <li><a class="nav-pills" data-toggle="tab" href="#element_admin"><img src="images/terminal_icon.png" alt="" width="16" height="16"><span>元素管理</span></a></li>
                     <li><h>帮助中心</h></li>
-                    <li><a class="nav-pills" data-toggle="tab" href="#help" ><img src="images/help_icon.png" alt="" width="16" height="16">常见问题</a></li>
-                    <li><a class="nav-pills" data-toggle="tab" href="#help" ><img src="images/help_icon.png" alt="" width="16" height="16">常见问题</a></li>
-                    <li><a class="nav-pills" data-toggle="tab" href="#help" ><img src="images/help_icon.png" alt="" width="16" height="16">常见问题</a></li>
-                    <li><a class="nav-pills" data-toggle="tab" href="#help" ><img src="images/help_icon.png" alt="" width="16" height="16">常见问题</a></li>
                     <li><a class="nav-pills" data-toggle="tab" href="#help" ><img src="images/help_icon.png" alt="" width="16" height="16">常见问题</a></li>
                 </ul>
             </div>
@@ -208,23 +205,28 @@
                         <div class="row">
                             <div class="col-sm-8 col-xs-offset-1">
                                 <div class="row" style="position: relative">
-                                    <video id="topic_vote_video" video-control href="#" data-toggle="modal" src={{video_url}} controls="controls" ng-click="add_hotpoint($event);bubble.open = true" width="800" height="600" style="border-radius: 5px"></video>
+                                    <video id="topic_vote_video" video-control href="#" src={{video_url}} controls="controls" ng-click="add_hotpoint($event);bubble.open = true" width="800" height="600" style="border-radius: 5px"></video>
+                                    {{current_project.project_id}}
                                     <div class="preview-box" ng-repeat="element in voteInfo" style="position: absolute;left: {{element.left}}px;top: {{element.top}}px;z-index: 100" ng-if="time>element.current_time&&time<element.current_time+3" ng-controller="Vote">
                                         <div class="style-preview style-{{element.color}}">
                                             <div style="background-image: url({{element.pic}})" class="banner"></div>
                                             <div class="question" ng-bind="element.title"></div>
-                                            <div class="options">
+                                            <div class="options" ng-if="!element.voted" >
                                                 <!-- ngRepeat: option in editDg.qoptions -->
-                                                <div  ng-if="!element.voted" ng-repeat="option in element.options track by $index" class="option ng-scope" style="">
+                                                <div ng-repeat="option in element.options track by $index" class="option ng-scope" style="">
                                                     <label>
                                                         <input type="radio" name="option" ng-model="element.answer" value={{$index}}>
                                                         <span class="ng-binding">{{option}}</span>
                                                     </label>
                                                 </div>
-                                                <form class="form-horizontal" ng-if="element.voted" ng-repeat="option in element.options track by $index">
+                                                <!-- end ngRepeat: option in editDg.qoptions -->
+                                            </div>
+                                            <div class="result" ng-if="element.voted" >
+                                                <form class="form-horizontal" ng-repeat="option in element.options track by $index">
+                                                    <!--<div class="form-horizontal" ng-if="element.voted" ng-repeat="option in element.options track by $index">-->
                                                     <div class="form-group">
-                                                        <label class="col-sm-3">{{option}}</label>
-                                                        <label class="col-sm-9">共计{{element.sta_info[$index]}}票</label>
+                                                        <p class="col-sm-5">{{option}}</p>
+                                                        <label class="col-sm-7">共计{{element.sta_info[$index]}}票</label>
                                                         <!--<div class="col-sm-10 progress">-->
                                                         <!--<div class="progress-bar progress-bar-success" role="progressbar"-->
                                                         <!--aria-valuenow="60" aria-valuemin="0" aria-valuemax="100"-->
@@ -233,7 +235,6 @@
                                                         <!--</div>-->
                                                     </div>
                                                 </form>
-                                                <!-- end ngRepeat: option in editDg.qoptions -->
                                             </div>
                                             <!--投票成功-->
                                             <!--<div class="vote-btn" ng-if="element.voted">投票成功</div>-->
@@ -243,7 +244,6 @@
                                         </div>
                                     </div>
                                 </div>
-                                {{voteInfo}}
                                 <div class="row">
                                     <div class="input-group" style="width: 800px">
                                         <input ng-model="url" placeholder="请输入视频链接，点击播放" class="form-control" >
@@ -310,6 +310,7 @@
                             </div>
                         </div>
                     </div>
+                    {{voteInfo}}
                     <popup ng-if="bubble.open" close="bubble.open=false" close-action="esc outerchick">
                         <button class="btn-success ui-popup-bottom-left" ng-click="bubble.open = false;add_element()">确认添加?</button>
                     </popup>
@@ -491,34 +492,50 @@
                     <div class="media">
                         <div class="row">
                             <div class="col-sm-8">
-                                <video id="" src={{video_url}} controls="controls" width="800" height="600" style="border-radius: 5px"></video>
-                                <div class="input-group" style="width: 800px">
-                                    <input ng-model="url" placeholder="请输入视频链接，点击播放" class="form-control ng-valid ng-touched ng-dirty ng-valid-parse" >
+                                <div class="row" style="position: relative;">
+                                    <video id="cloud_photo_video" src={{video_url}} controls="controls" ng-click="add_hotpoint($event);bubble.open = true" width="800" height="600" style="border-radius: 5px"></video>
+                                    <!--照片元素-->
+                                    <div ng-repeat="element in cloudInfo" style="z-index: 10;">
+                                        <div ng-repeat="t in element.times track by $index" ng-if="t>time&&t<time+3" style="top: {{element.positions[$index].t}}px;left: {{element.positions[$index].l}}px;z-index: 100;position: absolute;">
+                                            <a href="http://{{element.link}}/">
+                                                <img src={{element.pic}}>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="input-group" style="width: 800px">
+                                        <input ng-model="url" placeholder="请输入视频链接，点击播放" class="form-control ng-valid ng-touched ng-dirty ng-valid-parse" >
                                     <span class="input-group-btn">
                                         <button class="btn btn-primary btn-flat ng-isolate-scope" ng-click="seturl()">确定</button>
                                     </span>
+                                    </div>
                                 </div>
                             </div>
                             <div class="col-sm-4">
                                 <div class="row">
-                                    <label>*样式列表</label>
+                                    <label>*云图列表</label>
+                                    <a class="file pull-right" ng-click="create_element()">确认创建</a>
                                     <a href="javascript:;" class="file pull-right" style="margin-right: 20px">
-                                        <input type="file" file-model="myFile" ngf-select ngf-pattern="'image/*'" ngf-multiple="false" ng-model="new_element.pic_file" ng-click="add_element()">添加云图
+                                        <input type="file" file-model="myFile" ngf-select ngf-pattern="'image/*'" ngf-multiple="false" ng-model="new_element.pic_file">选择图片
                                     </a>
                                 </div>
                                 <div class="row rightDiv">
-                                    <!--<a href="#cloud_photo_modal1" class="row" data-toggle="modal">-->
-                                        <!--<img src="images/baike.png" alt="baike_sample1" width="95%" style="border-radius: 5px">-->
-                                    <!--</a>-->
-                                    <a href="#{{element.name}}" class="row" data-toggle="modal" ng-repeat="element in cloudInfo">
-                                        <img src={{element.pic}} width="95%" style="border-radius: 5px">
-                                    </a>
+                                    <div ng-repeat="element in cloudInfo">
+                                        <a href="#{{$index}}" data-toggle="modal">
+                                            <label>元素名称:{{element.name}}</label>
+                                            <img src={{element.pic}} style="border-radius: 5px;width: 400px;height: 280px;">
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
+                    <popup ng-if="bubble.open" close="bubble.open=false" close-action="esc outerchick">
+                        <button href="#choose_element" class="btn-success ui-popup-bottom-left" ng-click="bubble.open = false" data-toggle="modal">确认添加?</button>
+                    </popup>
                     <!--云图云窗编辑框-->
-                    <div class="modal fade" id="element.name" ng-repeat="element in cloudInfo">
+                    <div class="modal fade" id={{$index}} ng-repeat="element in cloudInfo" tabindex="-1">
                         <div class="modal-dialog">
                             <div class="modal-content">
                                 <div class="modal-header">
@@ -530,10 +547,10 @@
                                     <form class="form-horizontal">
                                         <div class="form-group">
                                             <div class="col-sm-2 col-sm-offset-1">
-                                                <label>图片</label>
+                                                <label>云图名称</label>
                                             </div>
                                             <div class="col-sm-9">
-                                                <img src="" alt="点击上传照片" style="width: 400px; height: 300px;">
+                                                <input type="text" class="form-control" placeholder="元素名称" ng-model="element.name">
                                             </div>
                                         </div>
                                         <div class="form-group">
@@ -541,15 +558,7 @@
                                                 <label>云图标题</label>
                                             </div>
                                             <div class="col-sm-9">
-                                                <input type="text" class="form-control" id="cloud_photo_title1" placeholder="title">
-                                            </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <div class="col-sm-2 col-sm-offset-1">
-                                                <label>云图介绍</label>
-                                            </div>
-                                            <div class="col-sm-9">
-                                                <textarea type="text" class="form-control" id="cloud_photo_info1" placeholder="information"></textarea>
+                                                <input type="text" class="form-control" id="cloud_photo_title1" placeholder="title" ng-model="element.title">
                                             </div>
                                         </div>
                                         <div class="form-group">
@@ -557,7 +566,60 @@
                                                 <label>外部链接</label>
                                             </div>
                                             <div class="col-sm-9">
-                                                <input type="text" class="form-control" id="cloud_photo_link1" placeholder="www.baike.com">
+                                                <input type="text" class="form-control" id="cloud_photo_link1" placeholder="www.baike.com" ng-model="element.link">
+                                            </div>
+                                        </div>
+                                        <!--<div class="form-group">-->
+                                            <!--<div class="col-sm-2 col-sm-offset-1">-->
+                                                <!--<label>投票起止时间</label>-->
+                                            <!--</div>-->
+                                            <!--<div class="col-sm-4">-->
+                                                <!--<input type="date" ng-model="element.start_time" required><br>-->
+                                                <!--<span style="color:red" ng-show="!element.start_time">-->
+                                                    <!--<span>请输入开始时间</span>-->
+                                                 <!--</span>-->
+                                            <!--</div>-->
+                                            <!--<div class="col-sm-4">-->
+                                                <!--<input type="date" ng-model="element.end_time" required><br>-->
+                                                <!--<span style="color:red" ng-show="!element.end_time">-->
+                                                    <!--<span>请输入结束时间</span>-->
+                                                 <!--</span>-->
+                                            <!--</div>-->
+                                        <!--</div>-->
+                                    </form>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭
+                                    </button>
+                                    <button type="button" class="btn btn-primary" data-dismiss="modal" ng-disabled="!element.name || !element.title || !element.link">
+                                        确认
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!--选择元素-->
+                    <div class="modal fade" id="choose_element" tabindex="-1">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h4 class="modal-title">
+                                        添加云图
+                                    </h4>
+                                </div>
+                                <div class="modal-body">
+                                    <form class="form-horizontal">
+                                        <div class="row" style="height: 500px;">
+                                            <div class="col-sm-2 col-sm-offset-1">
+                                                <label>请选择您要添加的元素</label>
+                                            </div>
+                                            <div class="col-sm-9" style="height: 500px;background-color: #e9e9e9;">
+                                                <div style="height: 500px;width: 430px;border-radius: 5px;overflow: auto;position: fixed">
+                                                    <a href="#" ng-repeat="element in cloudInfo">
+                                                        <label>{{element.name}}</label><br>
+                                                        <img src={{element.pic}} alt=pic{{$index}} style="width: 400px;height: 280px;" ng-click="change_element(element.element_Id)"><br>
+                                                    </a>
+                                                </div>
                                             </div>
                                         </div>
                                     </form>
@@ -565,7 +627,7 @@
                                 <div class="modal-footer">
                                     <button type="button" class="btn btn-default" data-dismiss="modal">关闭
                                     </button>
-                                    <button type="button" class="btn btn-primary">
+                                    <button type="button" class="btn btn-primary" data-dismiss="modal" ng-click="add_element()" ng-disabled="!current_element_Id">
                                         确认
                                     </button>
                                 </div>
@@ -574,14 +636,14 @@
                     </div>
                 </div>
                 <!--广告云窗-->
-                <div class="tab-pane" id="ad_picture">
+                <div class="tab-pane container-fluid" id="ad_picture">
                     <div class="page-header">
                         <h1>广告</h1>
                     </div>
                     <div class="media">
                         <div class="row">
                             <div class="col-sm-8">
-                                <video id="cloud_photo_video" src="video/sample.mp4" controls="controls" width="800" height="600" style="border-radius: 5px"></video>
+                                <video id="" src="video/sample.mp4" controls="controls" width="800" height="600" style="border-radius: 5px"></video>
                                 <div class="input-group" style="width: 800px">
                                     <input ng-model="videoUrl" placeholder="请输入视频链接，点击播放" class="form-control ng-valid ng-touched ng-dirty ng-valid-parse" >
                                     <span class="input-group-btn">
@@ -594,9 +656,9 @@
                                 <a href="#ad_photo_modal1" class="row" data-toggle="modal">
                                     <img src="images/guanggao.png" alt="baike_sample1" width="100%" style="border-radius: 5px">
                                 </a>
-                                <a href="#ad_photo_modal2" class="row" data-toggle="modal">
-                                    <img src="images/guanggao.png" alt="baike_sample2" width="100%" style="border-radius: 5px">
-                                </a>
+                                <div class="modal-content">
+
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -780,6 +842,7 @@
                         <h1>项目设置</h1>
                     </div>
                 </div>
+                <!--元素管理-->
                 <div class="tab-pane container-fluid" id="element_admin" ng-controller="elementAdmin">
                     <div class="page-header">
                         <h1>元素管理</h1>
@@ -790,19 +853,19 @@
                             <thead>
                                 <tr>
                                     <th>#</th>
+                                    <th>项目id</th>
                                     <th>元素id</th>
                                     <th>元素类型</th>
-                                    <th>开启时间</th>
-                                    <th>终止时间</th>
+                                    <th>元素名称</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr ng-repeat="element in voteInfo">
                                     <td>{{$index+1}}</td>
+                                    <td>{{current_project.project_id}}</td>
                                     <td>{{element._id}}</td>
                                     <td>{{element.kind}}</td>
-                                    <td>{{element.start_time}}</td>
-                                    <td>{{element.end_time}}</td>
+                                    <td>{{element.name}}</td>
                                     <td><button ng-click="delete(element._id)">删除</button></td>
                                     <!--<td href="#project.project_id" data-toggle="collapse">项目详情<span class="caret"></span></td>-->
                                 </tr>
@@ -837,62 +900,83 @@
         </div>
     </div>
 
-    <div class="modal fade" id="ad_photo_modal1">
+    <!--<div class="modal fade" id="ad_photo_modal1">-->
+        <!--<div class="modal-dialog">-->
+            <!--<div class="modal-content">-->
+                <!--<div class="modal-header">-->
+                    <!--<h4 class="modal-title">-->
+                        <!--编辑云图-->
+                    <!--</h4>-->
+                <!--</div>-->
+                <!--<div class="modal-body">-->
+                    <!--<form class="form-horizontal">-->
+                        <!--<div class="form-group">-->
+                            <!--<div class="col-sm-2 col-sm-offset-1">-->
+                                <!--<label>广告图片</label>-->
+                            <!--</div>-->
+                            <!--<div class="col-sm-9">-->
+                                <!--<img src="" alt="点击上传照片" style="width: 400px; height: 300px;">-->
+                            <!--</div>-->
+                        <!--</div>-->
+                        <!--<div class="form-group">-->
+                            <!--<div class="col-sm-2 col-sm-offset-1">-->
+                                <!--<label>商品图片</label>-->
+                            <!--</div>-->
+                            <!--<div class="col-sm-9">-->
+                                <!--<img src="" alt="点击上传图片" style="width: 200px; height: 150px;">-->
+                            <!--</div>-->
+                        <!--</div>-->
+                        <!--<div class="form-group">-->
+                            <!--<div class="col-sm-2 col-sm-offset-1">-->
+                                <!--<label>广告标题</label>-->
+                            <!--</div>-->
+                            <!--<div class="col-sm-9">-->
+                                <!--<input type="text" id="cloud_photo_title2" placeholder="title">-->
+                            <!--</div>-->
+                        <!--</div>-->
+                        <!--<div class="form-group">-->
+                            <!--<div class="col-sm-2 col-sm-offset-1">-->
+                                <!--<label>广告备注</label>-->
+                            <!--</div>-->
+                            <!--<div class="col-sm-9">-->
+                                <!--<input type="text" id="cloud_photo_info2" placeholder="information">-->
+                            <!--</div>-->
+                        <!--</div>-->
+                        <!--<div class="form-group">-->
+                            <!--<div class="col-sm-2 col-sm-offset-1">-->
+                                <!--<label>商品链接</label>-->
+                            <!--</div>-->
+                            <!--<div class="col-sm-9">-->
+                                <!--<input type="text" id="cloud_photo_link2" placeholder="www.baike.com">-->
+                            <!--</div>-->
+                        <!--</div>-->
+                    <!--</form>-->
+                <!--</div>-->
+                <!--<div class="modal-footer">-->
+                    <!--<button type="button" class="btn btn-default" data-dismiss="modal">关闭-->
+                    <!--</button>-->
+                    <!--<button type="button" class="btn btn-primary" data-dismiss="modal">-->
+                        <!--确认-->
+                    <!--</button>-->
+                <!--</div>-->
+            <!--</div>-->
+        <!--</div>-->
+    <!--</div>-->
+    <!--删除确认窗口-->
+    <div class="modal fade" id="delete_confirm" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title">
-                        编辑云图
-                    </h4>
+                    删除项目
                 </div>
                 <div class="modal-body">
-                    <form class="form-horizontal">
-                        <div class="form-group">
-                            <div class="col-sm-2 col-sm-offset-1">
-                                <label>广告图片</label>
-                            </div>
-                            <div class="col-sm-9">
-                                <img src="" alt="点击上传照片" style="width: 400px; height: 300px;">
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <div class="col-sm-2 col-sm-offset-1">
-                                <label>商品图片</label>
-                            </div>
-                            <div class="col-sm-9">
-                                <img src="" alt="点击上传图片" style="width: 200px; height: 150px;">
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <div class="col-sm-2 col-sm-offset-1">
-                                <label>广告标题</label>
-                            </div>
-                            <div class="col-sm-9">
-                                <input type="text" id="cloud_photo_title2" placeholder="title">
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <div class="col-sm-2 col-sm-offset-1">
-                                <label>广告备注</label>
-                            </div>
-                            <div class="col-sm-9">
-                                <input type="text" id="cloud_photo_info2" placeholder="information">
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <div class="col-sm-2 col-sm-offset-1">
-                                <label>商品链接</label>
-                            </div>
-                            <div class="col-sm-9">
-                                <input type="text" id="cloud_photo_link2" placeholder="www.baike.com">
-                            </div>
-                        </div>
-                    </form>
+                    <label>确认删除项目{{projects[del_project].project_name}}?</label>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭
+                    <button type="button" class="btn btn-default" data-dismiss="modal">
+                        取消
                     </button>
-                    <button type="button" class="btn btn-primary">
+                    <button type="button" class="btn btn-primary" data-dismiss="modal" ng-click="confirm_delete()">
                         确认
                     </button>
                 </div>
@@ -981,17 +1065,20 @@
                         新建项目
                     </h4>
                 </div>
-                <!--改成ng-repeat-->
                 <div class="modal-body">
                     <form>
                         <div class="form-group">
                             <label>项目名称</label>
-                            <input type="text" class="form-control" placeholder="请输入项目名称">
+                            <input type="text" class="form-control" placeholder="请输入项目名称" ng-model="new_project.project_name">
+                            {{new_project.project_name}}
+                            <label>项目描述</label>
+                            <input type="text" class="form-control" placeholder="请输入项目名称" ng-model="new_project.description">
+                            {{new_project.description}}
                         </div>
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary btn-block" ng-click="add_point()" data-dismiss="modal">
+                    <button type="button" class="btn btn-primary btn-block" ng-click="create_project()">
                         确认
                     </button>
                 </div>
@@ -1002,16 +1089,16 @@
                         新建项目成功
                     </h4>
                 </div>
-                <!--改成ng-repeat-->
                 <div class="modal-body">
                     <form>
                         <div class="form-group">
-                            <label>项目名称{{project_name}}</label>
+                            <label class="col-sm-4">项目名称</label>
+                            <label class="col-sm-8">{{new_project.project_name}}</label>
                         </div>
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary btn-block" ng-click="create_success=true" data-dismiss="modal">
+                    <button type="button" class="btn btn-primary btn-block" ng-click="create_success=false" data-dismiss="modal">
                         确认
                     </button>
                 </div>
@@ -1019,12 +1106,10 @@
         </div>
     </div>
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-    <!--<script src="js/lib/jquery.min.js"></script>-->
     <script src="js/lib/jquery.min.js"></script>
     <script src="http://cdn.bootcss.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-    <!--<script src="js/lib/angular.min.js"></script>-->
-    <script src="http://cdn.static.runoob.com/libs/angular.js/1.4.6/angular.min.js"></script>
+    <script src="js/lib/angular.min.js"></script>
     <script src="js/lib/angular-popups.js"></script>
     <script src="js/Highcharts/code/highcharts.js"></script>
     <script src="js/Highcharts/code/highcharts-more.js"></script>

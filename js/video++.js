@@ -97,6 +97,30 @@ app.controller('MyController', ['$scope', '$rootScope', '$http', 'fileReader', f
 				console.log('logout error!');
 			})
 	};
+	//删除项目
+	$scope.del_project;
+	$scope.delete_project = function (id) {
+		console.log('delete')
+		for (p in $scope.projects) {
+			if ($scope.projects[p].project_id == id) {
+				$scope.del_project = p;
+				break;
+			}
+		}
+	}
+
+	$scope.confirm_delete = function () {
+		$http({method: 'POST', url: 'http://10.108.101.173:3000/project/delete',
+			data: {project_Id: $scope.projects[$scope.del_project].project_id},
+			headers: {'x-access-token': $rootScope.token}})
+			.then(function success(response) {
+				console.log(response.data);
+				$scope.projects.splice(p, 1);
+				$scope.change_project($scope.projects[0]);
+			},function error() {
+
+			})
+	}
 }]);
 
 //登录模块
@@ -171,14 +195,19 @@ app.controller('elementAdmin', ['$scope', '$rootScope', '$http', function ($scop
 
 //创建新项目
 app.controller('createProject', ['$scope', '$rootScope', '$http', function ($scope, $rootScope, $http) {
-	$scope.project_name = '';
+	$scope.new_project = {project_name: '', project_id: '', description: ''};
 	$scope.create_success = false;
 	$scope.create_project = function () {
-		$http({method: 'POST', url: 'http://10.108.101.173:3000/project/create', data: $scope.project_name,
+		console.log('create');
+		console.log($scope.new_project);
+		$http({method: 'POST', url: 'http://10.108.101.173:3000/project/create',
+			data: {project_name: $scope.new_project.project_name, description: $scope.new_project.description},
 				headers:{'x-access-token': $rootScope.token}})
 			.then(function success(response) {
-				$scope.projects.push(response.data);
-				change_project(response.data.project_Id);
+				console.log(response.data);
+				$scope.projects.push({project_name: $scope.new_project.project_name, project_id: response.data.result._Id});
+				$scope.change_project({project_name: $scope.new_project.project_name, project_id: response.data.result._Id});
+				$scope.create_success = true;
 			},function error() {
 				console.log('create error');
 			})
@@ -197,6 +226,9 @@ app.controller('topicVote', ['$scope', '$rootScope', '$http', 'fileReader', 'Upl
 	$scope.pic_file = null;
 	$scope.current_pattern = {_id: '' , kind: 1,title:'who?', options:['me', 'you'], name: '', color: '0', video_id: '1', current_time: '', pic: 'images/banner.png',
 		start_time: 0, end_time: 0, link: 'www.baidu.com', left :300, top: 300, voted: false, answer: -1, sta_info: []};
+
+	//按钮是否显示
+	$scope.btn_show = false;
 
 	//投票问题增减
 	$scope.delete_option = function (index) {
@@ -268,13 +300,15 @@ app.controller('topicVote', ['$scope', '$rootScope', '$http', 'fileReader', 'Upl
 
 	//确认添加元素
 	$scope.add_element =function () {
-
+		console.log('11');
 		var p = $.extend(true, {}, $scope.current_pattern);
 
 		temp = {colors: [],images: [], kind: '', links: [], name: [],
-			positions: [], sizes: [], texts: [], times: [], titles: [], _id: ''}
+			positions: [], sizes: [], texts: [], times: [], titles: [], _id: ''};
 		temp.colors.push($scope.current_pattern.color);
-		temp.images.push($scope.pic_name);
+		// if ($scope.pic_file != null){
+		// 	temp.images.push($scope.current_pattern.name);
+		// }
 		temp.kind = $scope.current_pattern.kind;
 		temp.links.push($scope.current_pattern.link);
 		temp.positions.push({t: $scope.current_pattern.left,l: $scope.current_pattern.top,w: 0, h: 0});
@@ -285,10 +319,9 @@ app.controller('topicVote', ['$scope', '$rootScope', '$http', 'fileReader', 'Upl
 		temp.name = $scope.current_pattern.name;
 		temp.titles.push($scope.current_pattern.title);
 		all = {properties: temp, project_Id: $scope.current_project.project_id};
-
-
+		console.log(all);
 		$http({method:'POST', url:'http://10.108.101.173:3000/element/create', data:all,
-				headers:{'x-access-token': $rootScope.token}})
+			headers:{'x-access-token': $rootScope.token}})
 			.then(function success(response) {
 				console.log(response.data);
 				temp._id = response.data.result;
@@ -298,33 +331,30 @@ app.controller('topicVote', ['$scope', '$rootScope', '$http', 'fileReader', 'Upl
 				$http({method: 'POST', url: 'http://10.108.101.173:3000/element/updateVoteNum', data: {element_Id:response.data.result, num: len},
 						headers: {'x-access-token': $rootScope.token}})
 					.then(function success(response) {
-						console.log(response.data);
-						console.log('update');
+
 					},function error() {
 
-					})
+					});
 				//上传图片
-				$scope.upload(response.data.result, $scope.pic_file, $scope.current_pattern.name);
+				if ($scope.pic_file != null){
+					$scope.upload(response.data.result, $scope.pic_file, $scope.current_pattern.name);
+				}
 		},function error() {
-			//传图片
+				console.log('create vote element error')
 		});
-		$scope.upload = function (_Id, file, name) {
-			console.log('upload');
-			Upload.upload({url:'http://10.108.101.173:3000/image/upload',
-				data:{element_Id: _Id, file_name: name, file: file},
-				}).success(function () {
-						console.log('upload');
-				}).error(function () {
 
-			})
+		p.kind = '话题投票';
 
-		}
-		switch (p.kind){
-			case 1:
-				p.kind = '话题投票';
-				break;
-		}
 		$scope.voteInfo.push(p);
+	};
+	$scope.upload = function (_Id, file, name) {
+		Upload.upload({url:'http://10.108.101.173:3000/image/upload',
+			data:{element_Id: _Id, file_name: name, file: file}
+		}).success(function (response) {
+
+		}).error(function () {
+
+		})
 	};
 }]);
 
@@ -344,7 +374,7 @@ app.controller('Vote', ['$scope', '$rootScope', '$http', function ($scope, $root
 				console.log(num);
 				for(var i=0;i<num ;i++){
 					console.log(i);
-					$scope.voteInfo[ele].sta_info.push(response.data.result.data[i].count);
+					$scope.voteInfo[ele].sta_info.push(response.data.result.data[i].count+1);
 					console.log(response.data.result.data[i].count);
 				}
 				$scope.voteInfo[ele].voted = true;
@@ -355,19 +385,157 @@ app.controller('Vote', ['$scope', '$rootScope', '$http', function ($scope, $root
 }]);
 
 //云图
-app.controller('cloudPicture', ['$scope', function ($scope) {
+app.controller('cloudPicture', ['$scope', '$rootScope', 'fileReader', '$http', function ($scope, $rootScope, fileReader, $http) {
 	$scope.video_url = 'video/sample.mp4';
 	$scope.url = '';
 	$scope.seturl = function () {
 		$scope.video_url = $scope.url;
 	};
-	$scope.new_element = [];
-	$scope.cloudInfo = [];
+	$scope.new_element = {element_Id: '', kind: 2, name: '', pic:'', pic_file: '', title: '', link: '', start_time: '', end_time: ''};
+	$scope.current_element_Id = '';
+	// $scope.cloudInfo = [];
+	$scope.cloudInfo =
+		[
+			{element_Id: 1, kind: 2, name: 'zz', pic: 'images/small/1.jpg', title: 't', link: 'www.baidu.com', times: [1,5,7],
+			positions: [{t:100,l:100}, {t:100,l:300}, {t:400,l:100}]},
+			{element_Id: 2, kind: 2, name: 'z3z', pic: 'images/small/2.jpg', title: 't', link: 'www.baidu.com', times: [3,6,9],
+				positions: [{t:100,l:100}, {t:100,l:300}, {t:400,l:100}]},
+			{element_Id: 3, kind: 2, name: 'z5z', pic: 'images/small/3.jpg', title: 't', link: 'www.baidu.com', times: [5,10,17],
+				positions: [{t:100,l:100}, {t:100,l:300}, {t:400,l:100}]}
+		]
+	$scope.position = {t: '', l: '', w: 0, h: 0};
+	$scope.show_time = '';
+	$scope.time = '';
+	$scope.getFile = function () {
+		fileReader.readAsDataUrl($scope.file, $scope)
+			.then(function (result) {
+				$scope.new_element.pic = result;
+			})
+	};
 
-	//添加新元素
-	$scope.add_element = function () {
-		var temp = $.extend(true, {}, $scope.new_element);
-		$socpe.cloudInfo.push(temp);
+	//获取播放器播放信息
+	var video_id = document.getElementById('cloud_photo_video');
+	video_id.ontimeupdate=function(){tagtime_judge(this)};
+	function tagtime_judge(event)
+	{
+		$scope.time = event.currentTime;
+		$scope.$digest();
+	}
+
+	//创建新元素
+	$scope.create_element = function () {
+		if ($scope.new_element.pic_file == ''){
+			window.alert('请先选择图片!');
+		}
+		else {
+			var p = $.extend(true, {}, $scope.new_element);
+
+			temp = {colors: [],images: [], kind: '', links: [], name: [],
+			positions: [], sizes: [], texts: [], times: [], titles: [], _id: ''};
+			temp.images.push($scope.new_element.name);
+			temp.kind = $scope.new_element.kind;
+			temp.links.push($scope.new_element.link);
+			temp.name = $scope.new_element.name;
+			all = {properties: temp, project_Id: $scope.current_project.project_id};
+
+			$http({method: 'POST', url: 'http://10.108.101.173:3000/element/create', data: all,
+					headers: {'x-access-token': $rootScope.token}})
+				.then(function success(response) {
+					p._id = response.data.result;
+					upload(response.data.result, $scope.new_element.pic_file, $scope.new_element.name);
+				},function error() {
+					console.log('create cloud photo error')
+				})
+			p.kind = '云图云窗'
+			$scope.cloudInfo.push(p);
+		}
+	}
+
+	//上传文件
+	upload = function (_Id, file, name) {
+		console.log('upload');
+		Upload.upload({url:'http://10.108.101.173:3000/image/upload',
+			data:{element_Id: _Id, file_name: name, file: file},
+		}).success(function () {
+			console.log('upload');
+		}).error(function () {
+
+		})
+	};
+
+	//计算位置
+	$scope.add_hotpoint = function (mouseEvent) {
+		var video = angular.element(mouseEvent.toElement);
+		video[0].pause();
+		var width = video[0].width;
+		var height = video[0].height;
+		$scope.show_time = video[0].currentTime;
+		if (!mouseEvent){
+			mouseEvent = window.event;
+		}
+
+		if (mouseEvent.pageX || mouseEvent.pageY){
+			$scope.position.l = mouseEvent.pageX;
+			$scope.position.t = mouseEvent.pageY;
+		}
+		else if (mouseEvent.clientX || mouseEvent.clientY){
+			$scope.position.l = mouseEvent.clientX + document.body.scrollLeft +
+				document.documentElement.scrollLeft;
+			$scope.position.t = mouseEvent.clientY + document.body.scrollTop +
+				document.documentElement.scrollTop;
+		}
+
+		if (mouseEvent.target){
+			var offEl = mouseEvent.target;
+			var offX = 0;
+			var offY = 0;
+			if (typeof(offEl.offsetParent) != "undefined"){
+				while (offEl){
+					offX += offEl.offsetLeft;
+					offY += offEl.offsetTop;
+					offEl = offEl.offsetParent;
+				}
+			}
+			else{
+				offX = offEl.left;
+				offY = offEl.top;
+			}
+
+			$scope.position.l -= offX;
+			$scope.position.t -= offY;
+		}
+	};
+
+	//选择元素
+	$scope.change_element = function (id) {
+		console.log('change element');
+		$scope.current_element_Id = id;
+	}
+	
+	//添加位置和时间信息
+	$scope.add_element =function () {
+		for (ele in $scope.cloudInfo){
+			if ($scope.cloudInfo[ele]._id == $scope.current_element_Id){
+				break;
+			}
+		}
+		$http({method: 'POST', url: 'http://10.108.101.173:3000/element/addTimes',
+			data: {element_Id: $scope.current_element_Id, times: $scope.show_time},
+			headers: {'x-access-token': $rootScope.token}})
+			.then(function success() {
+				$scope.cloudInfo[ele].times.push($scope.show_time);
+			},function error() {
+
+			});
+		$http({method: 'POST', url: 'http://10.108.101.173:3000/element/addTimes',
+			data: {element_Id: $scope.current_element_Id, positions: $scope.show_time},
+			headers: {'x-access-token': $rootScope.token}})
+			.then(function success() {
+				$scope.cloudInfo[ele].positions.push($scope.position);
+			},function error() {
+
+			});
+		$scope.current_element_Id = '';
 	}
 }])
 

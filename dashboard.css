@@ -232,25 +232,36 @@ body {
 .style-preview-box .style-preview .vote-btn .btn:hover{color:inherit}
 
 .preview-box{margin-top:5px;margin-bottom:10px;height:250px;border:1px #777 dashed}
-.preview-box .style-preview{width:150px;margin:auto;color:#fff}
+.preview-box .style-preview{width:200px;margin:auto;color:#fff}
 .preview-box .style-preview.style-0 .question{background-color:#851a1f}
 .preview-box .style-preview.style-0 .options,
+.preview-box .style-preview.style-0 .result,
 .preview-box .style-preview.style-0 .vote-btn{background-color:#bd1e20}
 .preview-box .style-preview.style-1 .question{background-color:#085289}
 .preview-box .style-preview.style-1 .options,
+.preview-box .style-preview.style-1 .result,
 .preview-box .style-preview.style-1 .vote-btn{background-color:#1766a6}
 .preview-box .style-preview.style-2 .question{background-color:#1d6835}
 .preview-box .style-preview.style-2 .options,
+.preview-box .style-preview.style-2 .result,
 .preview-box .style-preview.style-2 .vote-btn{background-color:#348739}
 .preview-box .style-preview.style-3 .question{background-color:#343a3e}
 .preview-box .style-preview.style-3 .options,
+.preview-box .style-preview.style-3 .result,
 .preview-box .style-preview.style-3 .vote-btn{background-color:rgba(0,0,0,.5)}
-.preview-box .style-preview .banner{width:150px;height:65px;position:relative;background-position:left;background-repeat:no-repeat;background-size:contain;margin-left:-23px;margin-bottom:-13px}
+.preview-box .style-preview .banner{width:200px;height:65px;position:relative;background-position:left;background-repeat:no-repeat;background-size:contain;margin-left:-23px;margin-bottom:-13px}
 .preview-box .style-preview .question{height:50px;padding:15px;border-top-left-radius:10px;border-top-right-radius:10px;font-weight:700;overflow-y:auto;word-break:break-all}
 .preview-box .style-preview .options{padding:10px 15px 0;height:90px;word-break:break-all;overflow-y:auto}
+.preview-box .style-preview .result{padding:10px 15px 0;height:130px;word-break:break-all;overflow-y:auto}
 .preview-box .style-preview .vote-btn{border-bottom-left-radius:10px;border-bottom-right-radius:10px;height:40px;text-align:center}
 .preview-box .style-preview .vote-btn .btn{font-weight:700;padding:3px 30px;border:1px solid #fff;background-color:inherit}
 .preview-box .style-preview .vote-btn .btn:hover{color:inherit}
+
+.cloud-preview{
+    width: 200px;
+    height: 200px;
+    border: 1px;
+}
 
 .cloud-photo{
     top: 0px;
@@ -319,7 +330,10 @@ body {
     右侧栏
 */
 .rightDiv {
-    height:100%;
+    height:80%;
     overflow: auto;
     position: fixed;
+}
+.rightDiv  a {
+    height: 300px;
 }

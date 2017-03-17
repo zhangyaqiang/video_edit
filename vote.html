@@ -1,0 +1,25 @@
+<div class="preview-box" ng-if="element.kind==0" style="position: absolute;left: {{element.left}}px;top: {{element.top}}px;z-index: 100" ng-if="time>element.current_time&&time<element.current_time+3">
+<!--<div class="preview-box" ng-repeat="element in elementInfo" style="position: absolute;left: {{element.left}}px;top: {{element.top}}px;z-index: 100" ng-if="time>element.current_time&&time<element.current_time+3">-->
+    <div class="style-preview style-{{element.color}}">
+        <div style="background-image: url({{element.pic}})" class="banner"></div>
+        <div class="question" ng-bind="element.title"></div>
+        <div class="options">
+            <!-- ngRepeat: option in editDg.qoptions -->
+            <div  ng-if="!element.voted" ng-repeat="option in element.options track by $index" class="option ng-scope" style="">
+                <label>
+                    <input type="radio" name="option" ng-model="element.answer" value={{$index}}>
+                    <span class="ng-binding">{{option}}</span>
+                </label>
+            </div>
+            <form class="form-horizontal" ng-if="element.voted" ng-repeat="option in element.options track by $index">
+                <div class="form-group">
+                    <label class="col-sm-5">{{option}}</label>
+                    <label class="col-sm-7">共计{{element.sta_info[$index]}}票</label>
+                </div>
+            </form>
+        </div>
+        <div class="vote-btn" ng-if="!element.voted">
+            <button class="btn btn-sm" ng-click="vote(element._id)">投票</button>
+        </div>
+    </div>
+</div>
