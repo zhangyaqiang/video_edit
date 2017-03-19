@@ -12,55 +12,94 @@ app.controller('MyController', ['$scope', '$rootScope', '$http', 'fileReader', f
 	$rootScope.token = '';
 	//项目信息 [{'project_id': xxx, 'project_name': xxx}, {'project_id': xxx, 'project_name': xxx}]
 	$scope.projects = [];
-	$scope.voteInfo = [];
+	$scope.elementInfo = [];
 	//当前项目
 	$scope.current_project = {project_name: 'Test', project_id: 000001};
 	$scope.getproject = function () {
 		$http({method: 'GET', url: 'http://10.108.101.173:3000/project/getProjects', data: '',
 				headers: {'x-access-token': $rootScope.token}})
 			.then(function success(response) {
+				console.log(response.data);
 				$scope.projects = response.data.result;
-				$scope.current_project = $scope.projects[0];
-				$scope.project_info();
+				if ($scope.projects.length == 0) {
+					$scope.current_project = {};
+				}else {
+					$scope.current_project = $scope.projects[0];
+					$scope.project_info();
+				}
 			},function error(data, status, headers, config) {
 				consolfae.log('error');
 			});
 	};
 	$scope.change_project = function (project) {
 		$scope.current_project = project;
-		$scope.voteInfo = [];
+		$scope.elementInfo = [];
 		//切换项目时刷新数据
 		$scope.project_info();
 	};
 	//获取项目信息
 	$scope.project_info = function () {
-		$http({method: 'POST', url: 'http://10.108.101.173:3000/project/getAllElements', data: {project_Id: $scope.current_project.project_id},
+		$http({method: 'GET', url: 'http://10.108.101.173:3000/api/getProjectAttributes/'+$scope.current_project.project_id,
 				headers: {'x-access-token': $rootScope.token}})
 			.then(function success(response) {
+				console.log(111,response.data);
 				//获取所有项目信息
 				for (ele in response.data.result){
-					ele = response.data.result[ele];
+					e = response.data.result[ele];
 					//分类
-					switch(ele.kind) {
+					switch(e.kind) {
 						case 1:
-							var temp = {_id: '' , kind: '',title:'', options:[], color: '', video_id: '', current_time: '', pic: '',
+							var temp = {_Id: '' , kind: '',title:'', options:[], color: '', video_id: '', current_time: '', pic: '',
 								start_time:'', end_time: '', link: '', left :'', top: '', voted: false, answer: -1, sta_info: []};
-							// temp.project_id = $scope.current_project.project_id;
-							temp._id = ele._id;
+							temp._Id = e._id;
 							temp.kind = '话题投票';
-							temp.title = ele.titles[0];
-							temp.color = ele.colors[0];
-							// temp.video_id =
-							temp.current_time = Number(ele.times[0]);
-							temp.pic = ele.images[0];
-							temp.link = ele.links[0];
-							temp.left = ele.positions[0].l;
-							temp.top = ele.positions[0].t;
-							temp.options = ele.texts;
-							temp.start_time = ele.times[1];
-							temp.end_time = ele.times[2];
+							temp.title = e.titles[0];
+							temp.color = e.colors[0];
+							temp.name = e.name;
+							temp.current_time = Number(e.times[0]);
+							temp.pic = 'http://10.108.101.173:3000/'+e.images[0];
+							temp.link = e.links[0];
+							temp.left = e.positions[0].l;
+							temp.top = e.positions[0].t;
+							temp.options = e.texts;
+							temp.start_time = e.times[1];
+							temp.end_time = e.times[2];
 							var element = $.extend(true, {}, temp);
-							$scope.voteInfo.push(element);
+							$scope.elementInfo.push(element);
+							break;
+						case 2:
+							var temp = {_Id: '' , kind: '',title:'', pic: '', link: '', positions: [], times: [], name: ''};
+							temp._Id = e._id;
+							temp.kind = '云图云窗';
+							temp.title = e.titles[0];
+							temp.name = e.name;
+							temp.pic = 'http://10.108.101.173:3000/'+e.images[0];
+							temp.link = e.links[0];
+							temp.positions = e.positions;
+							for(t in e.times){
+								e.times[t] = Number(e.times[t]);
+							}
+							temp.times = e.times;
+							var element = $.extend(true, {}, temp);
+							$scope.elementInfo.push(element);
+							break;
+						case 3:
+							var temp = {_Id: '' , kind: '',title:'', pic: '', link: '', color:'', positions: [], times: [], name: '', description: '', show: false};
+							temp._Id = e._id;
+							temp.kind = '广告云窗';
+							temp.title = e.titles[0];
+							temp.description = e.description;
+							temp.name = e.name;
+							temp.pic = 'http://10.108.101.173:3000/'+e.images[0];
+							temp.link = e.links[0];
+							temp.color = e.colors[0];
+							temp.positions = e.positions;
+							for(t in e.times){
+								e.times[t] = Number(e.times[t]);
+							}
+							temp.times = e.times;
+							var element = $.extend(true, {}, temp);
+							$scope.elementInfo.push(element);
 							break;
 					}
 				}
@@ -121,6 +160,43 @@ app.controller('MyController', ['$scope', '$rootScope', '$http', 'fileReader', f
 
 			})
 	}
+	
+	//
+	$scope.player;
+	var video_id = document.getElementById('ad_photo_video');
+	function getElementLeft(element){
+		var actualLeft = element.offsetLeft;
+		var current = element.offsetParent;
+		while (current !== null){
+			actualLeft += current.offsetLeft;
+			current = current.offsetParent;
+		}
+		return actualLeft;
+	}
+	function getElementTop(element){
+		var actualTop = element.offsetTop;
+		var current = element.offsetParent;
+		while (current !== null){
+			actualTop += current.offsetTop;
+			current = current.offsetParent;
+		}
+		return actualTop;
+	}
+	function pausecomp(millis)
+	{
+		var date = new Date();
+		var curDate = null;
+		do { curDate = new Date(); }
+		while(curDate-date < millis);
+	}
+
+
+	$scope.player_info = function () {
+		setTimeout(function(){
+			$scope.player = {top: getElementTop(video_id), left: getElementLeft(video_id), width: video_id.width, height: video_id.height}
+			console.log($scope.player);
+		}, 200);
+	}
 }]);
 
 //登录模块
@@ -156,13 +232,19 @@ app.controller('Register', ['$scope', '$rootScope', '$http', '$window', function
 	$scope.pwd_inconsistent = true;
 
 	$scope.submit = function () {
-		$http({method: 'POST', url: '10.108.101.173:3000/user/register', data: $scope.register,
-			headers: {'Content-Type': 'application/left-www-form-urlencoded',
-				'x-access-token': $rootScope.token}})
-			.then(function success() {
-				console.log('register success!');
-				$rootScope.User = $scope.register.username;
-				$rootScope.isAuthenticated = true;
+		$http({method: 'POST', url: 'http://10.108.101.173:3000/user/register', data:$scope.register,
+			headers: {'x-access-token': $rootScope.token}})
+			.then(function success(response) {
+				console.log('register success!', response.data);
+				if (response.data.status == 0){
+					$rootScope.User = $scope.register.username;
+					$rootScope.isAuthenticated = true;
+					$rootScope.token = response.data.token;
+					$scope.getproject();
+				}
+				else{
+					$scope.illegal = true;
+				}
 			},function error() {
 				$scope.illegal = true;
 			})
@@ -175,8 +257,8 @@ app.controller('elementAdmin', ['$scope', '$rootScope', '$http', function ($scop
 	
 	$scope.data = {pic: '/images/banner.png'};
 	$scope.delete = function (id) {
-		for (ele in $scope.voteInfo){
-			if($scope.voteInfo[ele]._id == id){
+		for (ele in $scope.elementInfo){
+			if($scope.elementInfo[ele]._Id == id){
 				// var index = i;
 				break;
 			}
@@ -184,7 +266,7 @@ app.controller('elementAdmin', ['$scope', '$rootScope', '$http', function ($scop
 		$http({method:'POST', url: 'http://10.108.101.173:3000/element/delete', data: {element_Id: id},
 			headers: {'x-access-token': $rootScope.token}})
 			.then(function success(response) {
-				$scope.voteInfo.splice(ele,1);
+				$scope.elementInfo.splice(ele,1);
 			},function error() {
 
 			})
@@ -196,7 +278,7 @@ app.controller('elementAdmin', ['$scope', '$rootScope', '$http', function ($scop
 //创建新项目
 app.controller('createProject', ['$scope', '$rootScope', '$http', function ($scope, $rootScope, $http) {
 	$scope.new_project = {project_name: '', project_id: '', description: ''};
-	$scope.create_success = false;
+	$scope.create_success_1 = true;
 	$scope.create_project = function () {
 		console.log('create');
 		console.log($scope.new_project);
@@ -205,13 +287,16 @@ app.controller('createProject', ['$scope', '$rootScope', '$http', function ($sco
 				headers:{'x-access-token': $rootScope.token}})
 			.then(function success(response) {
 				console.log(response.data);
-				$scope.projects.push({project_name: $scope.new_project.project_name, project_id: response.data.result._Id});
-				$scope.change_project({project_name: $scope.new_project.project_name, project_id: response.data.result._Id});
-				$scope.create_success = true;
+				temp = {project_name: $scope.new_project.project_name, project_id: response.data.result._Id};
+				var p = $.extend(true, {}, temp);
+				$scope.projects.push(p);
+				$scope.change_project(p);
+				// $scope.change_project({project_name: $scope.new_project.project_name, project_id: response.data.result._Id});
 			},function error() {
 				console.log('create error');
 			})
-	}
+	};
+
 }]);
 
 //话题投票模块
@@ -224,7 +309,7 @@ app.controller('topicVote', ['$scope', '$rootScope', '$http', 'fileReader', 'Upl
 	$scope.default_pic = 'images/banner.png';
 	$scope.pic_name = '';
 	$scope.pic_file = null;
-	$scope.current_pattern = {_id: '' , kind: 1,title:'who?', options:['me', 'you'], name: '', color: '0', video_id: '1', current_time: '', pic: 'images/banner.png',
+	$scope.current_pattern = {_Id: '' , kind: 1,title:'who?', options:['me', 'you'], name: '', color: '0', video_id: '1', current_time: '', pic: 'images/banner.png',
 		start_time: 0, end_time: 0, link: 'www.baidu.com', left :300, top: 300, voted: false, answer: -1, sta_info: []};
 
 	//按钮是否显示
@@ -311,7 +396,7 @@ app.controller('topicVote', ['$scope', '$rootScope', '$http', 'fileReader', 'Upl
 		// }
 		temp.kind = $scope.current_pattern.kind;
 		temp.links.push($scope.current_pattern.link);
-		temp.positions.push({t: $scope.current_pattern.left,l: $scope.current_pattern.top,w: 0, h: 0});
+		temp.positions.push({t: $scope.current_pattern.top,l: $scope.current_pattern.left,w: 0, h: 0});
 		temp.texts = $scope.current_pattern.options;
 		temp.times.push($scope.current_pattern.current_time);
 		temp.times.push($scope.current_pattern.start_time);
@@ -323,9 +408,9 @@ app.controller('topicVote', ['$scope', '$rootScope', '$http', 'fileReader', 'Upl
 		$http({method:'POST', url:'http://10.108.101.173:3000/element/create', data:all,
 			headers:{'x-access-token': $rootScope.token}})
 			.then(function success(response) {
-				console.log(response.data);
-				temp._id = response.data.result;
-				p._id = response.data.result;
+				console.log('ele_id',response.data);
+				temp._Id = response.data.result;
+				p._Id = response.data.result;
 				//发送选项数目
 				len = $scope.current_pattern.options.length;
 				$http({method: 'POST', url: 'http://10.108.101.173:3000/element/updateVoteNum', data: {element_Id:response.data.result, num: len},
@@ -345,7 +430,7 @@ app.controller('topicVote', ['$scope', '$rootScope', '$http', 'fileReader', 'Upl
 
 		p.kind = '话题投票';
 
-		$scope.voteInfo.push(p);
+		$scope.elementInfo.push(p);
 	};
 	$scope.upload = function (_Id, file, name) {
 		Upload.upload({url:'http://10.108.101.173:3000/image/upload',
@@ -362,22 +447,23 @@ app.controller('topicVote', ['$scope', '$rootScope', '$http', 'fileReader', 'Upl
 app.controller('Vote', ['$scope', '$rootScope', '$http', function ($scope, $rootScope, $http) {
 
 	$scope.vote = function (id) {
-		for (ele in $scope.voteInfo){
-			if($scope.voteInfo[ele]._id == id){
+		for (ele in $scope.elementInfo){
+			if($scope.elementInfo[ele]._Id == id){
 				break;
 			}
 		}
-		url = 'http://10.108.101.173:3000/api/vote/' + id + '/' + $scope.voteInfo[ele].answer;
+		url = 'http://10.108.101.173:3000/api/vote/' + id + '/' + $scope.elementInfo[ele].answer;
 		$http({method:'POST', url: url})
 			.then(function success(response) {
 				var num = response.data.result.num;
 				console.log(num);
 				for(var i=0;i<num ;i++){
 					console.log(i);
-					$scope.voteInfo[ele].sta_info.push(response.data.result.data[i].count+1);
+					$scope.elementInfo[ele].sta_info.push(response.data.result.data[i].count);
 					console.log(response.data.result.data[i].count);
 				}
-				$scope.voteInfo[ele].voted = true;
+				$scope.elementInfo[ele].voted = true;
+				$scope.elementInfo[ele].sta_info[$scope.elementInfo[ele].answer] += 1;
 			},function error() {
 
 			})
@@ -385,26 +471,17 @@ app.controller('Vote', ['$scope', '$rootScope', '$http', function ($scope, $root
 }]);
 
 //云图
-app.controller('cloudPicture', ['$scope', '$rootScope', 'fileReader', '$http', function ($scope, $rootScope, fileReader, $http) {
+app.controller('cloudPicture', ['$scope', '$rootScope', 'fileReader', '$http', 'Upload', function ($scope, $rootScope, fileReader, $http, Upload) {
 	$scope.video_url = 'video/sample.mp4';
 	$scope.url = '';
 	$scope.seturl = function () {
 		$scope.video_url = $scope.url;
 	};
-	$scope.new_element = {element_Id: '', kind: 2, name: '', pic:'', pic_file: '', title: '', link: '', start_time: '', end_time: ''};
+	$scope.pic_file = null;
+	$scope.new_element = {element_Id: '', kind: 2, name: '', pic:'', title: '', link: '', start_time: '', end_time: '', times: [], positions: []};
 	$scope.current_element_Id = '';
-	// $scope.cloudInfo = [];
-	$scope.cloudInfo =
-		[
-			{element_Id: 1, kind: 2, name: 'zz', pic: 'images/small/1.jpg', title: 't', link: 'www.baidu.com', times: [1,5,7],
-			positions: [{t:100,l:100}, {t:100,l:300}, {t:400,l:100}]},
-			{element_Id: 2, kind: 2, name: 'z3z', pic: 'images/small/2.jpg', title: 't', link: 'www.baidu.com', times: [3,6,9],
-				positions: [{t:100,l:100}, {t:100,l:300}, {t:400,l:100}]},
-			{element_Id: 3, kind: 2, name: 'z5z', pic: 'images/small/3.jpg', title: 't', link: 'www.baidu.com', times: [5,10,17],
-				positions: [{t:100,l:100}, {t:100,l:300}, {t:400,l:100}]}
-		]
+
 	$scope.position = {t: '', l: '', w: 0, h: 0};
-	$scope.show_time = '';
 	$scope.time = '';
 	$scope.getFile = function () {
 		fileReader.readAsDataUrl($scope.file, $scope)
@@ -424,15 +501,13 @@ app.controller('cloudPicture', ['$scope', '$rootScope', 'fileReader', '$http', f
 
 	//创建新元素
 	$scope.create_element = function () {
-		if ($scope.new_element.pic_file == ''){
+		if ($scope.pic_file == ''){
 			window.alert('请先选择图片!');
 		}
 		else {
 			var p = $.extend(true, {}, $scope.new_element);
-
 			temp = {colors: [],images: [], kind: '', links: [], name: [],
 			positions: [], sizes: [], texts: [], times: [], titles: [], _id: ''};
-			temp.images.push($scope.new_element.name);
 			temp.kind = $scope.new_element.kind;
 			temp.links.push($scope.new_element.link);
 			temp.name = $scope.new_element.name;
@@ -441,23 +516,55 @@ app.controller('cloudPicture', ['$scope', '$rootScope', 'fileReader', '$http', f
 			$http({method: 'POST', url: 'http://10.108.101.173:3000/element/create', data: all,
 					headers: {'x-access-token': $rootScope.token}})
 				.then(function success(response) {
-					p._id = response.data.result;
-					upload(response.data.result, $scope.new_element.pic_file, $scope.new_element.name);
+					p._Id = response.data.result;
+					upload(response.data.result, $scope.pic_file, $scope.new_element.name);
 				},function error() {
 					console.log('create cloud photo error')
-				})
-			p.kind = '云图云窗'
-			$scope.cloudInfo.push(p);
+				});
+			p.kind = '云图云窗';
+			$scope.elementInfo.push(p);
 		}
 	}
 
+	//编辑元素信息
+	$scope.edit_element = function (id) {
+		for (ele in $scope.elementInfo){
+			if ($scope.elementInfo[ele]._Id == id){
+				break;
+			}
+		}
+		$http({method: 'POST', url: 'http://10.108.101.173:3000/element/updateName',
+			data:{element_Id: $scope.elementInfo[ele], name: $scope.elementInfo[ele].name},
+			headers: {'x-access-token': $rootScope.token}})
+			.then(function success() {
+				console.log('update name');
+			},function error() {
+
+			});
+		$http({method: 'POST', url: 'http://10.108.101.173:3000/element/updateLinks',
+			data:{element_Id: $scope.elementInfo[ele], index: [0], links: [$scope.elementInfo[ele].link()]},
+			headers: {'x-access-token': $rootScope.token}})
+			.then(function success() {
+				console.log('update link');
+			},function error() {
+
+			});
+		$http({method: 'POST', url: 'http://10.108.101.173:3000/element/updateTitles',
+			data:{element_Id: $scope.elementInfo[ele], indexs:[0], titles: [$scope.elementInfo[ele].title]},
+			headers: {'x-access-token': $rootScope.token}})
+			.then(function success() {
+				console.log('update title');
+			},function error() {
+
+			});
+	}
+	
 	//上传文件
 	upload = function (_Id, file, name) {
-		console.log('upload');
 		Upload.upload({url:'http://10.108.101.173:3000/image/upload',
 			data:{element_Id: _Id, file_name: name, file: file},
 		}).success(function () {
-			console.log('upload');
+
 		}).error(function () {
 
 		})
@@ -511,33 +618,249 @@ app.controller('cloudPicture', ['$scope', '$rootScope', 'fileReader', '$http', f
 		console.log('change element');
 		$scope.current_element_Id = id;
 	}
-	
+
 	//添加位置和时间信息
 	$scope.add_element =function () {
-		for (ele in $scope.cloudInfo){
-			if ($scope.cloudInfo[ele]._id == $scope.current_element_Id){
+		for (ele in $scope.elementInfo){
+			if ($scope.elementInfo[ele]._Id == $scope.current_element_Id){
 				break;
 			}
 		}
 		$http({method: 'POST', url: 'http://10.108.101.173:3000/element/addTimes',
-			data: {element_Id: $scope.current_element_Id, times: $scope.show_time},
+			data: {element_Id: $scope.current_element_Id, times: [$scope.show_time]},
+			headers: {'x-access-token': $rootScope.token}})
+			.then(function success(response) {
+				console.log(222);
+				console.log(222,$scope.show_time);
+				console.log(response.data);
+				var t = $scope.show_time;
+				$scope.elementInfo[ele].times.push(t);
+			},function error() {
+				console.log(3333);
+			});
+		$http({method: 'POST', url: 'http://10.108.101.173:3000/element/addPositions',
+			data: {element_Id: $scope.current_element_Id, positions: [$scope.position]},
 			headers: {'x-access-token': $rootScope.token}})
 			.then(function success() {
-				$scope.cloudInfo[ele].times.push($scope.show_time);
+				var p = $.extend(true, {}, $scope.position)
+				$scope.elementInfo[ele].positions.push(p);
 			},function error() {
 
 			});
-		$http({method: 'POST', url: 'http://10.108.101.173:3000/element/addTimes',
-			data: {element_Id: $scope.current_element_Id, positions: $scope.show_time},
-			headers: {'x-access-token': $rootScope.token}})
-			.then(function success() {
-				$scope.cloudInfo[ele].positions.push($scope.position);
-			},function error() {
-
-			});
-		$scope.current_element_Id = '';
+		console.log('add_photo');
+		$scope.current_element_Id = false;
 	}
-}])
+}]);
+
+//广告
+app.controller('adPhoto',['$scope', '$rootScope', 'fileReader', '$http', 'Upload', function ($scope, $rootScope, fileReader, $http, Upload) {
+	$scope.video_url = 'video/sample.mp4';
+	$scope.url = '';
+	$scope.seturl = function () {
+		$scope.video_url = $scope.url;
+	};
+	$scope.pic_file = null;
+	$scope.new_element = {element_Id: '', kind: 2, name: '', pic:'', title: '', link: '', times: [], positions: [], color: '0', show: false, description:''};
+	$scope.position = {t: '', l: '', w: 0, h: 0};
+	$scope.time = '';
+	$scope.current_element_Id = '';
+	$scope.show;
+	$scope.getFile = function () {
+		fileReader.readAsDataUrl($scope.file, $scope)
+			.then(function (result) {
+				$scope.new_element.pic = result;
+			})
+	};
+
+	//获取播放器播放信息
+	var video_id = document.getElementById('ad_photo_video');
+	video_id.ontimeupdate=function(){tagtime_judge(this)};
+	function tagtime_judge(event)
+	{
+		$scope.time = event.currentTime;
+		$scope.$digest();
+	}
+	
+	
+	$scope.create_element = function () {
+		var p = $.extend(true, {}, $scope.new_element);
+		temp = {colors: [],images: [], kind: '', links: [], name: [],
+			positions: [], sizes: [], description: '', times: [], titles: [], _id: ''};
+		temp.kind = 3;
+		temp.links.push($scope.new_element.link);
+		temp.name = $scope.new_element.name;
+		temp.titles.push($scope.new_element.title);
+		temp.description= $scope.new_element.description;
+		temp.colors.push($scope.new_element.color);
+		all = {properties: temp, project_Id: $scope.current_project.project_id};
+
+		$http({method: 'POST', url: 'http://10.108.101.173:3000/element/create', data: all,
+			headers: {'x-access-token': $rootScope.token}})
+			.then(function success(response) {
+				p._Id = response.data.result;
+				upload(response.data.result, $scope.pic_file, $scope.new_element.name);
+			},function error() {
+				console.log('create ad photo error');
+			});
+		p.kind = '广告云窗'
+		$scope.elementInfo.push(p);
+	};
+
+	//计算位置
+	$scope.add_hotpoint = function (mouseEvent) {
+		var video = angular.element(mouseEvent.toElement);
+		video[0].pause();
+		var width = video[0].width;
+		var height = video[0].height;
+		$scope.show_time = video[0].currentTime;
+		if (!mouseEvent){
+			mouseEvent = window.event;
+		}
+
+		if (mouseEvent.pageX || mouseEvent.pageY){
+			$scope.position.l = mouseEvent.pageX;
+			$scope.position.t = mouseEvent.pageY;
+		}
+		else if (mouseEvent.clientX || mouseEvent.clientY){
+			$scope.position.l = mouseEvent.clientX + document.body.scrollLeft +
+				document.documentElement.scrollLeft;
+			$scope.position.t = mouseEvent.clientY + document.body.scrollTop +
+				document.documentElement.scrollTop;
+		}
+
+		if (mouseEvent.target){
+			var offEl = mouseEvent.target;
+			var offX = 0;
+			var offY = 0;
+			if (typeof(offEl.offsetParent) != "undefined"){
+				while (offEl){
+					offX += offEl.offsetLeft;
+					offY += offEl.offsetTop;
+					offEl = offEl.offsetParent;
+				}
+			}
+			else{
+				offX = offEl.left;
+				offY = offEl.top;
+			}
+
+			$scope.position.l -= offX;
+			$scope.position.t -= offY;
+		}
+	};
+
+	$scope.video_pause = function (id) {
+		video_id.pause();
+		for(ele in $scope.elementInfo){
+			if($scope.elementInfo[ele]._Id == id){
+				break;
+			}
+		}
+		console.log(33,ele);
+		$scope.elementInfo[ele].show =true;
+	}
+
+	$scope.video_start = function (id) {
+		video_id.play();
+		for(ele in $scope.elementInfo){
+			if($scope.elementInfo[ele]._Id == id){
+				break;
+			}
+		}
+		$scope.elementInfo[ele].show = false;
+	}
+
+	//编辑元素信息
+	$scope.edit_element = function (id) {
+		for (ele in $scope.elementInfo){
+			if ($scope.elementInfo[ele]._Id == id){
+				break;
+			}
+		}
+		$http({method: 'POST', url: 'http://10.108.101.173:3000/element/updateName',
+			data:{element_Id: $scope.elementInfo[ele], name: $scope.elementInfo[ele].name},
+			headers: {'x-access-token': $rootScope.token}})
+			.then(function success() {
+				console.log('update name');
+			},function error() {
+
+			});
+		$http({method: 'POST', url: 'http://10.108.101.173:3000/element/updateLinks',
+			data:{element_Id: $scope.elementInfo[ele], index: [0], links: [$scope.elementInfo[ele].link()]},
+			headers: {'x-access-token': $rootScope.token}})
+			.then(function success() {
+				console.log('update link');
+			},function error() {
+
+			});
+		$http({method: 'POST', url: 'http://10.108.101.173:3000/element/updateTitles',
+			data:{element_Id: $scope.elementInfo[ele], indexs:[0], titles: [$scope.elementInfo[ele].title]},
+			headers: {'x-access-token': $rootScope.token}})
+			.then(function success() {
+				console.log('update title');
+			},function error() {
+
+			});
+		$http({method: 'POST', url: 'http://10.108.101.173:3000/element/Description',
+			data:{element_Id: $scope.elementInfo[ele], indexs:[0], titles: [$scope.elementInfo[ele].description]},
+			headers: {'x-access-token': $rootScope.token}})
+			.then(function success() {
+				console.log('update description');
+			},function error() {
+
+			});
+	}
+
+	//上传文件
+	upload = function (_Id, file, name) {
+		Upload.upload({url:'http://10.108.101.173:3000/image/upload',
+			data:{element_Id: _Id, file_name: name, file: file},
+		}).success(function () {
+
+		}).error(function () {
+
+		})
+	};
+
+	//选择元素
+	$scope.change_element = function (id) {
+		console.log('change element');
+		console.log(id);
+		$scope.current_element_Id = id;
+	}
+
+	//添加元素
+	$scope.add_element =function () {
+		for (ele in $scope.elementInfo){
+			if ($scope.elementInfo[ele]._Id == $scope.current_element_Id){
+				break;
+			}
+		}
+		$http({method: 'POST', url: 'http://10.108.101.173:3000/element/addTimes',
+			data: {element_Id: $scope.current_element_Id, times: [$scope.show_time]},
+			headers: {'x-access-token': $rootScope.token}})
+			.then(function success(response) {
+				console.log(222);
+				console.log(222,$scope.show_time);
+				console.log(response.data);
+				var t = $scope.show_time;
+				$scope.elementInfo[ele].times.push(t);
+			},function error() {
+				console.log(3333);
+			});
+		$http({method: 'POST', url: 'http://10.108.101.173:3000/element/addPositions',
+			data: {element_Id: $scope.current_element_Id, positions: [$scope.position]},
+			headers: {'x-access-token': $rootScope.token}})
+			.then(function success() {
+				var p = $.extend(true, {}, $scope.position)
+				$scope.elementInfo[ele].positions.push(p);
+			},function error() {
+
+			});
+		console.log('add ad');
+		$scope.current_element_Id = false;
+	}
+}]);
 
 //文件读取指令
 app.directive('fileModel', ['$parse', function ($parse) {

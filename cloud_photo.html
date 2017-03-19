@@ -1,5 +1,5 @@
 <div ng-if="element.kind == 1" style="z-index: 10;">
-<!--<div ng-repeat="element in cloudInfo" style="z-index: 10;">-->
+<!--<div ng-repeat="element in elementInfo" style="z-index: 10;">-->
     <div ng-repeat="t in element.times track by $index" ng-if="t>time&&t<time+3" style="top: {{element.positions[$index].t}}px;left: {{element.positions[$index].l}}px;z-index: 100;position: absolute;">
         <a href="http://{{element.link}}/">
             <img src={{element.pic}}>

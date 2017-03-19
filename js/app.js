@@ -26,10 +26,10 @@ app.controller('Controller', ['$scope', '$rootScope', '$http', function ($scope,
 				//分类
 				switch(ele.kind) {
 					case 1:
-						var temp = {_id: '' , kind: '',title:'', options:[], color: '', video_id: '', current_time: '', pic: '',
+						var temp = {_Id: '' , kind: '',title:'', options:[], color: '', video_id: '', current_time: '', pic: '',
 							start_time:'', end_time: '', link: '', left :'', top: '', voted: false, answer: -1, sta_info: []};
 						// temp.project_id = $scope.current_project.project_id;
-						temp._id = ele._id;
+						temp._Id = ele._Id;
 						temp.kind = '话题投票';
 						temp.title = ele.titles[0];
 						temp.color = ele.colors[0];
@@ -55,7 +55,7 @@ app.controller('Controller', ['$scope', '$rootScope', '$http', function ($scope,
 	$scope.vote = function (id) {
 		console.log('1114444');
 		for (ele in $scope.elementInfo){
-			if($scope.elementInfo[ele]._id == id){
+			if($scope.elementInfo[ele]._Id == id){
 				break;
 			}
 		}
